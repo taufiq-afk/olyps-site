@@ -135,6 +135,10 @@ img { max-width: 100%; display: block; }
   color: var(--text);
 }
 
+/* Tautan kembali di halaman detail (proyek, riset, profil). Jarak ke isi di bawahnya sengaja lega. */
+.back-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap); margin-bottom: var(--space-5); color: var(--text-muted); text-decoration: none; font-weight: 500; }
+.back-link:hover { color: var(--text); }
+
 /* Kartu dan area */
 .card { background: var(--raised); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-sm); padding: var(--space-6); }
 .card--sm { padding: var(--card-pad-sm); min-height: var(--card-h-sm); }

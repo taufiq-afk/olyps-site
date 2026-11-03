@@ -46,8 +46,6 @@ const related = await getRelated('projects', entry.data.translationKey, lang);
 </PageShell>
 
 <style is:global>
-  .back-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap); margin-bottom: var(--space-3); color: var(--text-muted); text-decoration: none; font-weight: 500; }
-  .back-link:hover { color: var(--text); }
   .detail { display: grid; gap: var(--space-7); align-items: start; }
   @media (min-width: 56rem) { .detail { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } .detail__aside { position: sticky; top: calc(var(--capsule-h) + var(--space-6)); } }
   .detail__meta { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
