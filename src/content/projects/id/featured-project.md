@@ -2,27 +2,21 @@
 lang: id
 translationKey: featured-project
 title: Judul proyek akan ditentukan
-summary: "Placeholder: ringkasan proyek, menunggu teks resmi."
-status: in-progress
+summary: "Eksplorasi konsep fasilitas pemilahan kertas bekas yang cerdas, dibayangkan untuk mempelajari bagaimana computer vision bisa masuk ke alur kerja nyata. Ini konsep, bukan sistem yang beroperasi, dan semua angka adalah asumsi."
+status: concept
 caption: "Eksplorasi konsep. Visual ilustrasi, rupiah asumsi."
-mediaPoster: placeholder/poster.svg
+mediaPoster: media/olyps-hero-poster.webp
 order: 1
-placeholder: true
+placeholder: false
 relatedResearch:
-  - research-tbd
+  - recovered-paper-contamination
+relatedPeople:
+  - taufiq
 ---
 ## Tujuan
 
-Placeholder: akan ditulis.
+Memahami bagaimana computer vision dapat mendukung pemilahan kertas bekas dengan mengeksplorasi masalahnya sebagai konsep sebelum membangun apa pun.
 
 ## Cakupan
 
-Placeholder: akan ditulis.
-
-## Roadmap
-
-Placeholder: akan ditulis.
-
-## Dampak
-
-Placeholder: akan ditulis.
+Hanya konsep dan asumsi. Tanpa sistem yang beroperasi, tanpa data lapangan, dan tanpa keterlibatan mitra.

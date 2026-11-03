@@ -27,6 +27,8 @@ const research = collection('research', {
   title: z.string(),
   summary: z.string(),
   area: z.enum(['health', 'environment']).optional(),
+  // Status pekerjaan riset. Eksploratif berarti tahap awal tanpa hasil yang dipublikasikan.
+  status: z.enum(['exploratory', 'ongoing', 'completed']).optional(),
   relatedProjects: keys,
   relatedPublications: keys,
   relatedPeople: keys,

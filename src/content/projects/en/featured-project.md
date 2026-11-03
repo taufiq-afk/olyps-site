@@ -2,27 +2,21 @@
 lang: en
 translationKey: featured-project
 title: Project title to be decided
-summary: "Placeholder: project summary, awaiting official text."
-status: in-progress
+summary: "A concept exploration of an intelligent recovered-paper sorting facility, imagined to study how computer vision could fit into a real workflow. It is a concept, not an operating system, and all figures are assumptions."
+status: concept
 caption: "Concept exploration. Visuals are illustrative, rupiah figures are assumptions."
-mediaPoster: placeholder/poster.svg
+mediaPoster: media/olyps-hero-poster.webp
 order: 1
-placeholder: true
+placeholder: false
 relatedResearch:
-  - research-tbd
+  - recovered-paper-contamination
+relatedPeople:
+  - taufiq
 ---
 ## Goal
 
-Placeholder: to be written.
+To understand how computer vision could support the sorting of recovered paper by exploring the problem as a concept before building anything.
 
 ## Scope
 
-Placeholder: to be written.
-
-## Roadmap
-
-Placeholder: to be written.
-
-## Impact
-
-Placeholder: to be written.
+Concept and assumptions only. No operating system, no field data, and no partner involvement.

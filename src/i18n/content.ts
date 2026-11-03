@@ -100,7 +100,7 @@ export async function getFeatured(lang: Lang) {
 
 export function hrefFor(kind: Kind, slug: string, lang: Lang): string {
   const root = `${base}/${lang}/${kind}/`;
-  return kind === 'projects' || kind === 'people' ? `${root}${slug}/` : `${root}#${slug}`;
+  return kind === 'publications' ? `${root}#${slug}` : `${root}${slug}/`;
 }
 
 export interface RelatedItem { kind: Kind; key: string; title: string; href: string }

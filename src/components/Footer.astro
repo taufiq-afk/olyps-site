@@ -12,7 +12,7 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const to = (path: string) => `${base}/${lang}/${path}`;
-const areas = (await getLocalized('research', lang)).filter((e) => e.data.area);
+const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
 ---
 <footer class="footer">
   <div class="container">
@@ -34,11 +34,11 @@ const areas = (await getLocalized('research', lang)).filter((e) => e.data.area);
         </ul>
       </nav>
 
-      {areas.length > 0 && (
+      {researchEntries.length > 0 && (
       <nav class="footer__col" aria-labelledby="footer-research">
         <h2 id="footer-research" class="footer__title">{t('footer.research')}</h2>
         <ul>
-          {areas.map((e) => <li><a href={hrefFor('research', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
+          {researchEntries.map((e) => <li><a href={hrefFor('research', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
         </ul>
       </nav>
       )}
