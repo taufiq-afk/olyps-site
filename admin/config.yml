@@ -1,0 +1,108 @@
+# Uji admin lokal (Sveltia CMS). Hanya dilayani oleh `npm run dev`, tidak pernah masuk dist.
+# Alur: buka /olyps-site/admin/ di Chrome/Edge/Brave, klik "Work with Local Repository", pilih root proyek.
+# Backend di bawah hanya syarat konfigurasi; nilai repo boleh sembarang, tidak ada token atau OAuth.
+# Sumber kebenaran skema tetap src/content.config.ts: bila berubah, ubah juga berkas ini.
+backend:
+  name: github
+  repo: local/olyps-site
+  branch: main
+
+i18n:
+  structure: multiple_folders
+  locales: [en, id]
+  default_locale: en
+
+# Unggahan foto masuk src/assets/people (diproses Astro, bukan public/).
+# Batas: 1.500.000 byte per berkas (sama dengan maxFileBytes di scripts/predeploy.config.json).
+media_folder: /src/assets/people
+public_folder: /src/assets/people
+media_libraries:
+  default:
+    config:
+      max_file_size: 1500000
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 1024
+          height: 1024
+
+collections:
+  - name: people
+    label: People
+    label_singular: Person
+    folder: src/content/people
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: '{{translationKey}}'
+    create: true
+    summary: '{{name}} ({{role}})'
+    media_folder: /src/assets/people
+    public_folder: /src/assets/people
+    fields:
+      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
+      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
+      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
+      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
+      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
+      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
+      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
+      - { name: name, label: Name, widget: string, i18n: duplicate }
+      - { name: role, label: Role, widget: string, i18n: true }
+      - { name: bio, label: Bio, widget: text, i18n: true }
+      - { name: skills, label: Skills, widget: list, required: false, i18n: duplicate }
+      - { name: affiliations, label: Affiliations, widget: list, required: false, i18n: true }
+      - name: links
+        label: Links
+        widget: list
+        required: false
+        i18n: duplicate
+        fields:
+          - { name: label, label: Label, widget: string }
+          - { name: url, label: URL, widget: string }
+      # Foto hanya dengan izin orangnya. Path relatif ke berkas ini, menuju src/assets/people.
+      - { name: photo, label: Photo (only with permission), widget: image, required: false, i18n: duplicate }
+      # Relasi: daftar translationKey, divalidasi saat build (src/i18n/content.ts).
+      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+
+  # Tiga koleksi di bawah hanya sumber pilihan relasi: tersembunyi, tidak bisa dibuat atau dihapus lewat admin.
+  - name: research
+    label: Research (relation source)
+    folder: src/content/research
+    hide: true
+    create: false
+    delete: false
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    fields:
+      - { name: translationKey, widget: string, i18n: duplicate }
+      - { name: title, widget: string, i18n: true }
+  - name: projects
+    label: Projects (relation source)
+    folder: src/content/projects
+    hide: true
+    create: false
+    delete: false
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    fields:
+      - { name: translationKey, widget: string, i18n: duplicate }
+      - { name: title, widget: string, i18n: true }
+  - name: publications
+    label: Publications (relation source)
+    folder: src/content/publications
+    hide: true
+    create: false
+    delete: false
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    fields:
+      - { name: translationKey, widget: string, i18n: duplicate }
+      - { name: title, widget: string, i18n: true }

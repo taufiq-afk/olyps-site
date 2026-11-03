@@ -1,6 +1,10 @@
 import { getCollection } from 'astro:content';
-import { featured, FEATURED_MAX } from '../data/featured';
+import featuredData from '../data/featured.json';
 import { siteLangs, type Lang } from '../site.config';
+
+// Daftar unggulan: translationKey di koleksi projects, berurutan, maksimum 3. Sumber: src/data/featured.json.
+const featured = featuredData as string[];
+const FEATURED_MAX = 3;
 
 export type Kind = 'research' | 'projects' | 'publications' | 'people';
 const KINDS: Kind[] = ['research', 'projects', 'publications', 'people'];
@@ -91,7 +95,7 @@ export async function getLocalized<K extends Kind>(kind: K, lang: Lang) {
   });
 }
 
-/** Proyek unggulan sesuai urutan di src/data/featured.ts. */
+/** Proyek unggulan sesuai urutan di src/data/featured.json. */
 export async function getFeatured(lang: Lang) {
   const projects = await getLocalized('projects', lang);
   const ordered = featured.map((key) => projects.find((p) => p.data.translationKey === key)).filter((p): p is NonNullable<typeof p> => !!p);

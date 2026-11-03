@@ -8,7 +8,7 @@ import PlaceholderBadge from '../PlaceholderBadge.astro';
 
 interface Props {
   lang: Lang;
-  /** Proyek unggulan pertama (dari src/data/featured.ts). Kosong bila belum ada yang tampil. */
+  /** Proyek unggulan pertama (dari src/data/featured.json). Kosong bila belum ada yang tampil. */
   project?: { id: string; data: { title: string; summary: string; status: string; placeholder: boolean } };
 }
 const { lang, project } = Astro.props;

@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import devAdmin from './integrations/dev-admin.mjs';
 import { siteConfig, siteLangs, defaultLang } from './src/site.config.ts';
 
 export default defineConfig({
@@ -6,6 +7,8 @@ export default defineConfig({
   site: siteConfig.site,
   base: siteConfig.base,
   devToolbar: { enabled: false },
+  // Admin lokal, hanya dilayani oleh `astro dev` (lihat integrations/dev-admin.mjs).
+  integrations: [devAdmin()],
   i18n: {
     locales: siteLangs,
     defaultLocale: defaultLang,

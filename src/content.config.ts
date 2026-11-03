@@ -16,10 +16,12 @@ const common = {
 };
 const keys = z.array(z.string()).default([]);
 
-const collection = <T extends z.ZodRawShape>(name: string, shape: T) =>
+type ImageFn = Parameters<Extract<Parameters<typeof defineCollection>[0]['schema'], (...a: any[]) => any>>[0]['image'];
+
+const collection = <T extends z.ZodRawShape>(name: string, shape: T | ((image: ImageFn) => T)) =>
   defineCollection({
     loader: glob({ base: `./src/content/${name}`, pattern: '**/*.md' }),
-    schema: z.object({ ...common, ...shape }),
+    schema: ({ image }) => z.object({ ...common, ...(typeof shape === 'function' ? shape(image) : shape) }),
   });
 
 // Research: pertanyaan atau hipotesis, metode, temuan yang bisa dikutip (ditulis di badan Markdown).
@@ -50,7 +52,7 @@ const projects = collection('projects', {
   relatedPeople: keys,
 });
 
-const people = collection('people', {
+const people = collection('people', (image) => ({
   name: z.string(),
   role: z.string(),
   bio: z.string(),
@@ -59,12 +61,13 @@ const people = collection('people', {
   affiliations: z.array(z.string()).default([]),
   // Tautan profil opsional (mis. LinkedIn, Google Scholar, GitHub pribadi). Kosong: tidak dirender.
   links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
-  // Foto opsional, path relatif ke public/. Hanya dengan izin orangnya. Kosong: avatar tetap inisial.
-  photo: z.string().optional(),
+  // Foto opsional, path relatif ke berkas ini menuju src/assets/people/ (diproses Astro: diubah ukuran dan format).
+  // Hanya dengan izin orangnya. Kosong: avatar tetap inisial.
+  photo: image().optional(),
   relatedResearch: keys,
   relatedProjects: keys,
   relatedPublications: keys,
-});
+}));
 
 const publications = collection('publications', {
   title: z.string(),

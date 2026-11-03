@@ -1,17 +1,19 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
 interface Props {
   name: string;
-  /** Path foto relatif ke public/. Kosong: tampilkan inisial. */
-  photo?: string;
+  /** Foto dari src/assets/people (diproses Astro). Kosong: tampilkan inisial. */
+  photo?: ImageMetadata;
   large?: boolean;
 }
 const { name, photo, large = false } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const parts = name.split(/\s+/).filter(Boolean);
 const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 ---
 {photo
-  ? <img class:list={['avatar', 'avatar--photo', large && 'avatar--lg']} src={`${base}/${photo}`} alt={name} width="96" height="96" loading="lazy" decoding="async" />
+  ? <Image class:list={['avatar', 'avatar--photo', large && 'avatar--lg']} src={photo} alt={name} width={192} height={192} loading="lazy" decoding="async" />
   : <span class:list={['avatar', large && 'avatar--lg']} role="img" aria-label={name}>{initials}</span>}
 
 <style is:global>

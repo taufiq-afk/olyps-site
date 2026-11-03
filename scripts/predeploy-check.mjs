@@ -215,5 +215,16 @@ else {
   }
 }
 
+// ---------- 10. admin hanya untuk dev
+section('admin tidak ikut produksi');
+{
+  const findings = [];
+  for (const f of distFiles) if (rel(f).split(path.sep).includes('admin')) findings.push(`${rel(f)}: folder admin ada di dist`);
+  for (const { file, text } of distTexts) {
+    if (/sveltia|unpkg\.com\/@sveltia|netlify-cms|decap-cms/i.test(text)) findings.push(`${file}: rujukan ke CDN atau skrip admin`);
+  }
+  report('dist tidak berisi folder admin atau rujukan ke CDN admin', findings);
+}
+
 console.log(failures ? `\nHASIL: GAGAL (${failures} pemeriksaan tidak lolos). Jangan deploy.` : '\nHASIL: LOLOS. Aman untuk deploy.');
 process.exit(failures ? 1 : 0);
