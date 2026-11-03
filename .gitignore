@@ -1,0 +1,44 @@
+# Dependensi dan hasil build
+node_modules/
+dist/
+.astro/
+
+# Berkas sistem dan editor
+.DS_Store
+.claude/
+
+# Aturan dan daftar kata sensitif, hanya lokal
+CLAUDE.local.md
+scripts/forbidden.local.json
+
+# Rahasia
+.env
+.env.*
+!.env.example
+
+# Data mentah, dataset, dan materi program (jangan di-commit)
+/data/
+datasets/
+private/
+*.csv
+*.parquet
+*.h5
+*.pt
+*.onnx
+
+# Video asli berukuran besar
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.m4v
+
+# Hanya klip yang sengaja dipublikasikan, dikecualikan per nama berkas (bukan per ekstensi)
+!public/media/olyps-hero-loop.mp4
+!public/media/olyps-hero-loop.webm
+!public/media/olyps-hero-loop-light.mp4
+!public/media/olyps-hero-loop-light.webm
+
+# Log
+npm-debug.log*

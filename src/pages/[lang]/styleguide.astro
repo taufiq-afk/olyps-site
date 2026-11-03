@@ -1,0 +1,278 @@
+---
+// Halaman panduan gaya internal. Hanya dibuat saat `npm run dev`, tidak ikut di build.
+import {
+  Sun, Moon, Monitor, FlaskConical, Microscope, Folder, Users, BookOpen, Mail, Menu, X,
+  ArrowUpRight, ArrowDown, LayoutGrid,
+} from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import ThemeToggle from '../../components/ThemeToggle.astro';
+import LangSwitch from '../../components/LangSwitch.astro';
+import Widget from '../../components/Widget.astro';
+import Footer from '../../components/Footer.astro';
+import HeroMedia from '../../components/HeroMedia.astro';
+import { Pause, Play } from '@lucide/astro';
+import { siteConfig, type Lang, type ThemeName, type AccentKey } from '../../site.config';
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? [{ params: { lang: 'en' } }] : [];
+}
+
+const lang = 'en' as Lang;
+const themeNames = ['light', 'dark'] as ThemeName[];
+const accentKeys = ['a', 'b'] as AccentKey[];
+const surfaceKeys = ['bg', 'raised', 'sunken', 'text', 'textMuted'] as const;
+const icons = [
+  ['Sun', Sun], ['Moon', Moon], ['Monitor', Monitor], ['FlaskConical', FlaskConical], ['Microscope', Microscope],
+  ['Folder', Folder], ['Users', Users], ['BookOpen', BookOpen], ['Mail', Mail], ['Menu', Menu],
+  ['X', X], ['ArrowUpRight', ArrowUpRight], ['ArrowDown', ArrowDown], ['LayoutGrid', LayoutGrid],
+] as const;
+const type = [
+  ['Hero', 'var(--text-hero)', '700', 'Applied AI for health'],
+  ['Title', 'var(--text-title)', '700', 'What we work on'],
+  ['Lead', 'var(--text-lead)', '400', 'One supporting sentence that sets the tone.'],
+  ['Body', 'var(--text-body)', '400', 'Body text for paragraphs. Placeholder copy to judge rhythm, measure and contrast.'],
+  ['Small', 'var(--text-small)', '400', 'Small text for captions and notes.'],
+] as const;
+---
+<BaseLayout lang={lang} title="Styleguide" noindex>
+  <Navbar lang={lang} uid="main" />
+  <main id="content" class="container page-top sg">
+    <header class="sg-head">
+      <p class="eyebrow">Internal, dev only</p>
+      <h1>Styleguide</h1>
+      <p class="sg-lead">Halaman ini hanya ada saat <code>npm run dev</code>. Aksen aktif saat ini: <strong>{siteConfig.accent.toUpperCase()}</strong> ({siteConfig.accents[siteConfig.accent].name}). Ganti lewat <code>accent</code> di <code>site.config.ts</code>.</p>
+    </header>
+
+    <section class="sg-section">
+      <h2>1. Palet</h2>
+      <div class="sg-grid sg-grid--2">
+        {themeNames.map((name) => (
+          <div class="sg-panel" data-theme={name}>
+            <h3>{name === 'light' ? 'Terang' : 'Gelap'}</h3>
+            <div class="sg-swatches">
+              {surfaceKeys.map((k) => (
+                <div class="sg-swatch"><span style={`background:${siteConfig.themes[name][k]}`}></span><b>{k}</b><code>{siteConfig.themes[name][k]}</code></div>
+              ))}
+              {(['accent', 'companion'] as const).map((k) => (
+                <div class="sg-swatch"><span style={`background:${siteConfig.accents[siteConfig.accent][name][k]}`}></span><b>{k}</b><code>{siteConfig.accents[siteConfig.accent][name][k]}</code></div>
+              ))}
+            </div>
+            <div class="sg-layers">
+              <div class="sg-layer" style="background:var(--bg)">bg</div>
+              <div class="sg-layer" style="background:var(--raised);box-shadow:var(--shadow-sm);border:1px solid var(--border)">raised (kartu terangkat)</div>
+              <div class="sg-layer" style="background:var(--sunken)">sunken (area tenggelam)</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>2. Dua kandidat aksen, berdampingan</h2>
+      <p class="sg-note">Kolom kiri kandidat A, kanan kandidat B. Baris atas terang, bawah gelap. Pilih satu, lalu saya set <code>accent</code>.</p>
+      <div class="sg-grid sg-grid--2">
+        {themeNames.flatMap((name) => accentKeys.map((key) => (
+          <div class="sg-panel sg-accent" data-theme={name} data-accent={key}>
+            <h3>Kandidat {key.toUpperCase()}: {siteConfig.accents[key].name} ({name})</h3>
+            <div class="sg-swatches">
+              {(['accent', 'companion'] as const).map((k) => (
+                <div class="sg-swatch"><span style={`background:${siteConfig.accents[key][name][k]}`}></span><b>{k}</b><code>{siteConfig.accents[key][name][k]}</code></div>
+              ))}
+            </div>
+            <div class="sg-row">
+              <a class="btn btn--primary" href="#a">Primary</a>
+              <a class="btn btn--secondary" href="#a">Secondary</a>
+              <span class="badge badge--accent">In progress</span>
+              <span class="badge" style="background:color-mix(in srgb, var(--companion) 18%, transparent);color:var(--companion)">Companion</span>
+            </div>
+            <div class="sg-row">
+              <a href="#a">Tautan teks</a>
+              <LangSwitch lang={lang} demo />
+            </div>
+            <div class="sg-glowbox"><span>Cahaya halus dari aksen dan pendamping</span></div>
+          </div>
+        )))}
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>3. Tipografi</h2>
+      <div class="card sg-type">
+        {type.map(([label, size, weight, sample]) => (
+          <div class="sg-type__row">
+            <code>{label} {size.replace('var(', '').replace(')', '')}</code>
+            <p style={`font-size:${size};font-weight:${weight};line-height:1.15`}>{sample}</p>
+          </div>
+        ))}
+        <p class="eyebrow">Eyebrow, huruf kapital berjarak</p>
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>4. Tombol dan lencana</h2>
+      <div class="card sg-row">
+        <a class="btn btn--primary" href="#a">Primary <ArrowUpRight size={18} aria-hidden="true" /></a>
+        <a class="btn btn--secondary" href="#a">Secondary</a>
+        <a class="btn btn--ghost" href="#a">Ghost</a>
+        <span class="btn btn--primary" aria-disabled="true">Disabled</span>
+        <span class="badge badge--accent">In progress</span>
+        <span class="badge badge--outline">Placeholder</span>
+      </div>
+      <p class="sg-note">Tinggi minimal 44px, radius pill 999px.</p>
+    </section>
+
+    <section class="sg-section">
+      <h2>5. Kartu dan area</h2>
+      <div class="sg-grid sg-grid--3">
+        <div class="card"><h3>Kartu terangkat</h3><p class="sg-muted">Radius 24px, bayangan lembut, garis tepi tipis semi-transparan.</p></div>
+        <div class="sunken"><h3>Area tenggelam</h3><p class="sg-muted">Radius 14px untuk elemen kecil dan kolom isian.</p></div>
+        <div class="card" style="background:var(--glow),var(--raised)"><h3>Kartu dengan cahaya</h3><p class="sg-muted">Gradasi halus dari aksen.</p></div>
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>6. Ikon (Lucide, ISC)</h2>
+      <div class="card sg-icons">
+        {icons.map(([name, Icon]) => (
+          <div class="sg-icon"><Icon size={24} aria-hidden="true" /><code>{name}</code></div>
+        ))}
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>7. Navbar hibrida dan dua varian kaca</h2>
+      <p class="sg-note">Klik tautan untuk melihat penanda bergeser (mode demo). Varian tema dipakai di atas permukaan biasa, varian on-media (gelap translusen, teks terang) di atas panggung wallpaper. Navbar nyata beralih otomatis lewat IntersectionObserver saat keluar dari panggung. Menu ponsel muncul bila lebar jendela di bawah sekitar 1100px.</p>
+      {themeNames.map((name) => (
+        <div class="sg-stage sg-stage--plain" data-theme={name}>
+          <p class="sg-stage__label">Varian tema di atas permukaan {name === 'light' ? 'terang' : 'gelap'}</p>
+          <Navbar lang={lang} demo inline glass="theme" uid={`sg-theme-${name}`} current="projects" />
+        </div>
+      ))}
+      {themeNames.map((name) => (
+        <div class="sg-stage" data-theme={name}>
+          <HeroMedia video={false} lazy />
+          <p class="sg-stage__label">Varian on-media di atas poster, tema {name === 'light' ? 'terang' : 'gelap'}</p>
+          <Navbar lang={lang} demo inline glass="media" uid={`sg-media-${name}`} current="projects" />
+        </div>
+      ))}
+    </section>
+
+    <section class="sg-section">
+      <h2>8. Tombol tema dan bahasa</h2>
+      <div class="sg-grid sg-grid--2">
+        {themeNames.map((name) => (
+          <div class="sg-panel" data-theme={name}>
+            <h3>{name === 'light' ? 'Terang' : 'Gelap'}</h3>
+            <div class="sg-row">
+              <span class="glass sg-cap"><ThemeToggle lang={lang} demoMode="auto" /></span>
+              <span class="glass sg-cap"><ThemeToggle lang={lang} demoMode="light" /></span>
+              <span class="glass sg-cap"><ThemeToggle lang={lang} demoMode="dark" /></span>
+              <span class="glass sg-cap"><LangSwitch lang="en" demo /></span>
+              <span class="glass sg-cap"><LangSwitch lang="id" demo /></span>
+            </div>
+            <div class="sg-row" data-glass="media" style="background:var(--scrim-color);border-radius:var(--radius-sm);padding:var(--space-3)">
+              <span class="glass sg-cap"><ThemeToggle lang={lang} demoMode="auto" /></span>
+              <span class="glass sg-cap"><LangSwitch lang="en" demo /></span>
+              <span class="sg-muted" style="color:var(--m-text-muted)">on-media</span>
+            </div>
+            <p class="sg-muted">Ikon: monitor (auto), matahari (terang), bulan (gelap). Segmen EN | ID klik untuk menggeser penanda.</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>9. Widget kaca di atas poster dan video hero</h2>
+      <p class="sg-note">Semua widget memakai kaca varian on-media. Fokuskan dengan keyboard atau arahkan kursor untuk melihat efek hover dan fokus.</p>
+      <div class="sg-stage sg-stage--widgets" data-theme="light" data-glass="media">
+        <HeroMedia video={false} lazy position="50% 70%" />
+        <p class="sg-stage__label">Poster, tema terang</p>
+        <div class="sg-widgets">
+          <Widget lang={lang} icon={FlaskConical} title="Research" body="Contoh widget aktif dengan tautan." href="#w" />
+          <Widget lang={lang} icon={Folder} title="Projects" body="Contoh widget dengan tautan." href="#w" />
+          <Widget lang={lang} icon={Users} title="People" body="Contoh widget aktif dengan tautan." href="#w" />
+        </div>
+      </div>
+      <div class="sg-stage sg-stage--widgets" data-theme="dark" data-glass="media">
+        <HeroMedia lazy position="50% 70%" />
+        <p class="sg-stage__label">Video hero, tema gelap</p>
+        <div class="sg-widgets">
+          <Widget lang={lang} icon={FlaskConical} title="Research" body="Contoh widget aktif dengan tautan." href="#w" />
+          <Widget lang={lang} icon={Folder} title="Projects" body="Contoh widget dengan tautan." href="#w" />
+          <Widget lang={lang} icon={Users} title="People" body="Contoh widget aktif dengan tautan." href="#w" />
+        </div>
+      </div>
+    </section>
+
+    <section class="sg-section">
+      <h2>10. Kartu tautan dan tombol jeda media</h2>
+      <p class="sg-note">Kartu tautan memakai bahasa gerak yang sama dengan widget: hover mengangkat, kilau mengikuti kursor, panah bergeser. Semua gerak mati di reduced motion. Tombol jeda memakai kaca varian on-media dan ikon Lucide.</p>
+      <div class="sg-grid sg-grid--3">
+        <a class="card card--link" data-glow href="#c">
+          <span class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
+          <h3>Kartu tautan</h3>
+          <p class="sg-muted">Arahkan kursor atau fokuskan dengan keyboard.</p>
+          <ArrowUpRight class="card__arrow" size={22} aria-hidden="true" />
+        </a>
+      </div>
+      <div class="sg-stage sg-stage--widgets" data-theme="dark" data-glass="media" style="margin-top:var(--space-5)">
+        <HeroMedia video={false} lazy />
+        <p class="sg-stage__label">Tombol jeda dan putar, keadaan jeda dan putar</p>
+        <div class="sg-row" style="position:relative;z-index:1">
+          <span class="glass sg-cap" style="padding:0"><span class="sg-pill"><Pause size={18} aria-hidden="true" /></span></span>
+          <span class="glass sg-cap" style="padding:0"><span class="sg-pill"><Play size={18} aria-hidden="true" /></span></span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer lang={lang} />
+</BaseLayout>
+
+<style>
+  .sg { padding-bottom: var(--space-9); }
+  .sg-head { margin-bottom: var(--space-7); }
+  .sg-head h1 { font-size: var(--text-title); margin: var(--space-2) 0; }
+  .sg-lead, .sg-note, .sg-muted { color: var(--text-muted); }
+  .sg-note { margin-bottom: var(--space-4); font-size: var(--text-small); }
+  .sg-section { margin-top: var(--space-8); }
+  .sg-section > h2 { font-size: var(--text-lead); margin-bottom: var(--space-4); }
+  code { font-size: 0.85em; }
+
+  .sg-grid { display: grid; gap: var(--space-5); }
+  .sg-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 52rem) { .sg-grid--2 { grid-template-columns: minmax(0, 1fr); } }
+  .sg-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+
+  .sg-panel { background: var(--glow), var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-5); display: grid; gap: var(--space-4); align-content: start; }
+  .sg-panel h3 { font-size: 1rem; }
+  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--space-3); }
+  .sg-swatch { display: grid; gap: 2px; font-size: var(--text-small); }
+  .sg-swatch span { display: block; height: 3rem; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); }
+  .sg-layers { display: grid; gap: var(--space-3); }
+  .sg-layer { border-radius: var(--radius-sm); padding: var(--space-4); font-size: var(--text-small); }
+  .sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .sg-glowbox { background: var(--glow), var(--raised); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--space-6); color: var(--text-muted); font-size: var(--text-small); }
+
+  .sg-type { display: grid; gap: var(--space-5); }
+  .sg-type__row { display: grid; gap: var(--space-1); }
+  .sg-type__row code { color: var(--text-muted); }
+  .sg-type__row p { max-width: none; }
+
+  .sg-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); gap: var(--space-4); }
+  .sg-icon { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--sunken); color: var(--accent); }
+  .sg-icon code { color: var(--text-muted); font-size: 0.75rem; }
+
+  .sg-cap { display: inline-flex; padding: 4px; border-radius: var(--radius-pill); }
+
+  .sg-stage { position: relative; isolation: isolate; overflow: hidden; border-radius: var(--radius-card); padding: var(--space-5); margin-bottom: var(--space-5); color: var(--m-text); }
+  .sg-stage :global(.navbar) { padding: 0; }
+  .sg-stage :global(.navbar__grid), .sg-stage :global(.mobile-menu) { width: 100%; }
+  .sg-stage :global(.container) { width: 100%; }
+  .sg-stage--plain { background: var(--glow), var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .sg-stage--plain .sg-stage__label { color: var(--text-muted); }
+  .sg-pill { display: grid; place-items: center; width: var(--tap); height: var(--tap); color: var(--text); }
+  .sg-stage--widgets { padding: var(--space-7) var(--space-5); }
+  .sg-stage__label { position: relative; z-index: 1; font-size: var(--text-small); color: var(--m-text-muted); margin-bottom: var(--space-4); }
+  .sg-widgets { position: relative; z-index: 1; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+</style>

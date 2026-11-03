@@ -1,0 +1,42 @@
+---
+import type { Lang } from '../site.config';
+import type { RelatedItem } from '../i18n/content';
+import { useTranslations } from '../i18n/utils';
+import type { UiKey } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  items: RelatedItem[];
+  /** Versi ringkas untuk kartu dan baris di halaman indeks. */
+  compact?: boolean;
+}
+const { lang, items, compact = false } = Astro.props;
+const t = useTranslations(lang);
+---
+{items.length > 0 && (
+  <section class:list={['related', compact && 'related--compact']} aria-label={t('related.title')}>
+    {compact ? <p class="related__label">{t('related.title')}</p> : <h2 class="related__title">{t('related.title')}</h2>}
+    <ul>
+      {items.map((item) => (
+        <li><a class="chip" href={item.href}><span class="chip__kind">{t(`nav.${item.kind}` as UiKey)}</span>{item.title}</a></li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style is:global>
+  .related { margin-top: var(--space-6); }
+  .related--compact { margin-top: auto; padding-top: var(--space-3); width: 100%; }
+  .related__title { font-size: var(--text-lead); margin-bottom: var(--space-3); }
+  .related__label { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }
+  .related ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--space-2); min-height: 2rem; padding: 0 var(--space-3);
+    border-radius: var(--radius-pill); border: 1px solid var(--border-strong); color: var(--text);
+    font-size: var(--text-small); text-decoration: none;
+    transition: background-color 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  a.chip:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: var(--accent); }
+  .chip__kind { font-weight: 600; color: var(--accent); }
+  .chip--plain { color: var(--text-muted); }
+</style>

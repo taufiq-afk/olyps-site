@@ -1,0 +1,83 @@
+---
+import { ArrowUp } from '@lucide/astro';
+import { siteConfig, type Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+import type { UiKey } from '../i18n/ui';
+import ThemeToggle from './ThemeToggle.astro';
+import LangSwitch from './LangSwitch.astro';
+import { entrySlug, getLocalized, hrefFor } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const to = (path: string) => `${base}/${lang}/${path}`;
+const areas = (await getLocalized('research', lang)).filter((e) => e.data.area);
+---
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="footer__logo" href={to('')} aria-label={siteConfig.logo.alt}>
+          <span class="brand__mark" aria-hidden="true" style={`--mark: url(${base}/${siteConfig.logo.mark})`}></span>
+          <span class="brand__name">{siteConfig.name}</span>
+        </a>
+        <p>{t('footer.desc')}</p>
+      </div>
+
+      <nav class="footer__col" aria-labelledby="footer-explore">
+        <h2 id="footer-explore" class="footer__title">{t('footer.explore')}</h2>
+        <ul>
+          {siteConfig.nav.map((key) => (
+            <li><a href={to(`${key}/`)}>{t(`nav.${key}` as UiKey)}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      {areas.length > 0 && (
+      <nav class="footer__col" aria-labelledby="footer-research">
+        <h2 id="footer-research" class="footer__title">{t('footer.research')}</h2>
+        <ul>
+          {areas.map((e) => <li><a href={hrefFor('research', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
+        </ul>
+      </nav>
+      )}
+
+      <div class="footer__col">
+        <h2 class="footer__title">{t('footer.connect')}</h2>
+        <ul>
+          <li><a href={siteConfig.contact.github} rel="noopener">{t('contact.github')}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer__note">{t('footer.note')}</p>
+
+    <div class="footer__bottom">
+      <p class="footer__copy">© 2026 OLYPS</p>
+      <div class="footer__controls">
+        <LangSwitch lang={lang} />
+        <span class="footer__theme"><ThemeToggle lang={lang} /></span>
+        <a class="btn btn--secondary footer__top" href="#top"><ArrowUp size={18} aria-hidden="true" />{t('footer.top')}</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { padding-block: var(--space-8) var(--space-6); border-top: 1px solid var(--border); font-size: var(--text-small); color: var(--text-muted); }
+  .footer__grid { display: grid; gap: var(--space-6); grid-template-columns: 1.6fr 1fr 1fr 1.3fr; }
+  .footer__brand p { margin-top: var(--space-3); max-width: 28rem; }
+  .footer__logo { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text); text-decoration: none; min-height: var(--tap); }
+  .footer__title { font-size: var(--text-small); font-weight: 600; color: var(--text); letter-spacing: 0; margin-bottom: var(--space-3); }
+  .footer__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+  .footer__col a { color: var(--text-muted); text-decoration: none; }
+  .footer__col a:hover { color: var(--text); text-decoration: underline; }
+  .footer__muted { color: var(--text-muted); }
+  .footer__note { margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--border); max-width: 60rem; }
+  .footer__bottom { margin-top: var(--space-5); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+  .footer__controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .footer__theme { display: inline-flex; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--text) 7%, transparent); border: 1px solid var(--border); }
+  @media (max-width: 56rem) { .footer__grid { grid-template-columns: 1fr 1fr; } .footer__brand { grid-column: 1 / -1; } }
+  @media (max-width: 34rem) { .footer__grid { grid-template-columns: 1fr; } }
+</style>

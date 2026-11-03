@@ -1,0 +1,78 @@
+---
+import { Play } from '@lucide/astro';
+import type { Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  /** Path poster relatif ke public/. */
+  poster?: string;
+  /** Nama dasar klip tanpa ekstensi (.mp4 dan .webm di public/). Belum ada: hanya poster. */
+  video?: string;
+  /** Berkas VTT untuk bahasa halaman ini. */
+  captions?: string;
+  caption?: string;
+}
+const { lang, poster, video, captions, caption } = Astro.props;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<figure class="media-slot" data-media-slot data-base={base} data-video={video} data-captions={captions} data-lang={lang}>
+  <div class="media-slot__frame">
+    {poster ? <img src={`${base}/${poster}`} alt="" width="1280" height="720" /> : <div class="media-slot__empty"></div>}
+    {video && (
+      <button type="button" class="media-slot__play glass" data-slot-play aria-label={t('media.slot.play')}>
+        <Play size={22} aria-hidden="true" />
+      </button>
+    )}
+  </div>
+  <figcaption class="media-slot__caption">{caption}{!video && <span class="media-slot__note"> {t('media.slot.note')}</span>}</figcaption>
+</figure>
+
+<style is:global>
+  .media-slot { margin: 0; }
+  .media-slot__frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-card); border: 1px solid var(--border); background: var(--sunken); }
+  .media-slot__frame img, .media-slot__frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+  .media-slot__play {
+    position: absolute; inset: 50% auto auto 50%; transform: translate(-50%, -50%);
+    width: 4rem; height: 4rem; border-radius: 50%; display: grid; place-items: center; padding: 0;
+    color: var(--text); cursor: pointer; transition: transform 240ms var(--ease);
+  }
+  .media-slot__play:hover { transform: translate(-50%, -50%) scale(1.06); }
+  .media-slot__caption { margin-top: var(--space-3); font-size: var(--text-small); color: var(--text-muted); }
+  @media (prefers-reduced-motion: reduce) { .media-slot__play, .media-slot__play:hover { transition: none; transform: translate(-50%, -50%); } }
+</style>
+
+<script>
+  // Klip diputar hanya saat diklik, tanpa suara. Takarir (VTT) mengikuti bahasa halaman.
+  const init = () => {
+    document.querySelectorAll<HTMLElement>('[data-media-slot]:not([data-bound])').forEach((slot) => {
+      slot.dataset.bound = '';
+      const btn = slot.querySelector<HTMLButtonElement>('[data-slot-play]');
+      if (!btn || !slot.dataset.video) return;
+      btn.addEventListener('click', () => {
+        const base = slot.dataset.base ?? '';
+        const frame = slot.querySelector('.media-slot__frame');
+        if (!frame) return;
+        const v = document.createElement('video');
+        v.muted = true; v.playsInline = true; v.controls = true; v.preload = 'metadata';
+        [['webm', 'video/webm'], ['mp4', 'video/mp4']].forEach(([ext, type]) => {
+          const s = document.createElement('source');
+          s.src = `${base}/${slot.dataset.video}.${ext}`;
+          s.type = type;
+          v.appendChild(s);
+        });
+        if (slot.dataset.captions) {
+          const tr = document.createElement('track');
+          tr.kind = 'captions'; tr.src = `${base}/${slot.dataset.captions}`; tr.srclang = slot.dataset.lang ?? 'en'; tr.label = slot.dataset.lang ?? 'en'; tr.default = true;
+          v.appendChild(tr);
+        }
+        btn.remove();
+        frame.appendChild(v);
+        v.play().catch(() => {});
+      });
+    });
+  };
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

@@ -1,0 +1,8 @@
+---
+import type { Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+
+interface Props { lang: Lang }
+const t = useTranslations(Astro.props.lang);
+---
+<span class="badge badge--outline">{t('placeholder.badge')}</span>

@@ -1,0 +1,49 @@
+---
+import PageShell from '../../../components/PageShell.astro';
+import { entrySlug, getLocalized } from '../../../i18n/content';
+import { useTranslations } from '../../../i18n/utils';
+import { siteLangs, type Lang } from '../../../site.config';
+
+export function getStaticPaths() {
+  return siteLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const people = await getLocalized('people', lang);
+// Satu grid kompak, kartu sama untuk semua.
+const initials = (name: string) => {
+  const parts = name.split(/\s+/).filter(Boolean);
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+};
+---
+<PageShell lang={lang} current="people" title={t('nav.people')} banner="82% 88%">
+  {people.length === 0 ? (
+    <div class="card"><h2>{t('empty.nothing')}</h2></div>
+  ) : (
+    <div class="people-grid">
+      {people.map((person) => (
+        <a class="card card--sm card--link person" data-glow href={`${base}/${lang}/people/${entrySlug(person.id)}/`}>
+          <span class="avatar" role="img" aria-label={person.data.name}>{initials(person.data.name)}</span>
+          <h2>{person.data.name}</h2>
+          <p class="person__role">{person.data.role}</p>
+        </a>
+      ))}
+    </div>
+  )}
+</PageShell>
+
+<style is:global>
+  /* Auto-fill: 5 sampai 6 kolom pada lebar container maksimum. */
+  .people-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); }
+  .person { align-items: flex-start; }
+  .person h2 { font-size: 1.05rem; line-height: 1.25; }
+  .person__role { font-size: var(--text-small); }
+  .avatar {
+    flex: none; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent);
+    border: 1px dashed var(--accent); font-weight: 700; letter-spacing: 0.04em;
+  }
+  .avatar--lg { width: 6rem; height: 6rem; font-size: 2rem; }
+</style>

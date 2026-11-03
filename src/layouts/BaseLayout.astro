@@ -1,0 +1,127 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import { siteConfig, siteLangs, type Lang } from '../site.config';
+import { buildThemeCss } from '../styles/themeCss';
+import { isLang, switchLangPath, useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { lang, title, description, noindex = false } = Astro.props;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pageTitle = title ? `${title} | ${siteConfig.name}` : `${siteConfig.name}: ${siteConfig.tagline[lang]}`;
+const pageDescription = description ?? siteConfig.description[lang];
+const themeCss = buildThemeCss();
+
+// Open Graph. URL absolut memakai `site` dari konfigurasi bila sudah diisi, jika belum memakai origin saat ini.
+const origin = Astro.site ?? Astro.url.origin;
+const absolute = (path: string) => new URL(path, origin).href;
+const pageUrl = absolute(Astro.url.pathname);
+const ogImage = absolute(`${base}/${siteConfig.hero.dark.poster}`);
+const locales = { en: 'en_US', id: 'id_ID' } as const;
+const firstSegment = Astro.url.pathname.replace(base, '').split('/').filter(Boolean)[0];
+const alternates = isLang(firstSegment)
+  ? siteLangs.map((l) => ({ lang: l, href: absolute(switchLangPath(Astro.url.pathname, `${base}/`, l)) }))
+  : [];
+---
+<!doctype html>
+<html lang={lang} data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    {(siteConfig.noindex || noindex) && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:locale" content={locales[lang]} />
+    {siteLangs.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={locales[l]} />)}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content={t('og.image.alt')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    <link rel="icon" href={`${base}/${siteConfig.favicon}`} type="image/svg+xml" />
+    <style set:html={themeCss}></style>
+    <ClientRouter />
+    <noscript>
+      <style>
+        /* Tanpa JavaScript: menu ponsel selalu terbuka di bawah navbar, dan navbar ikut mengalir bersama halaman. */
+        @media (max-width: 68.75rem) {
+          .navbar { position: relative !important; }
+          .mobile-menu[hidden] { display: block !important; }
+          .menu-btn { display: none !important; }
+        }
+      </style>
+    </noscript>
+    <slot name="head" />
+    <script is:inline define:vars={{ defaultMode: siteConfig.defaultThemeMode }}>
+      // Berjalan sebelum render pertama agar tidak ada kilatan tema yang salah.
+      (function () {
+        var KEY = 'olyps-theme';
+        var MODES = ['auto', 'light', 'dark'];
+        var root = document.documentElement;
+        root.classList.add('js');
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        function stored() {
+          try { var v = localStorage.getItem(KEY); return MODES.indexOf(v) > -1 ? v : null; } catch (e) { return null; }
+        }
+        function apply() {
+          var mode = stored() || defaultMode;
+          var theme = mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode;
+          root.setAttribute('data-theme', theme);
+          root.setAttribute('data-theme-mode', mode);
+          document.dispatchEvent(new CustomEvent('olyps:theme', { detail: { mode: mode, theme: theme } }));
+        }
+        function set(mode) {
+          try { localStorage.setItem(KEY, mode); } catch (e) {}
+          apply();
+        }
+        window.olypsTheme = { apply: apply, set: set, modes: MODES };
+        apply();
+        if (mq.addEventListener) mq.addEventListener('change', apply);
+        // View Transitions: dokumen baru memakai tema dan kelas yang sama sebelum ditukar, jadi tidak ada kilatan.
+        document.addEventListener('astro:before-swap', function (e) {
+          var d = e.newDocument.documentElement;
+          d.setAttribute('data-theme', root.getAttribute('data-theme'));
+          d.setAttribute('data-theme-mode', root.getAttribute('data-theme-mode'));
+          d.classList.add('js');
+        });
+        document.addEventListener('astro:after-swap', function () {
+          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && document.querySelector('.reveal')) {
+            root.classList.add('reveal-on');
+          }
+        });
+      })();
+    </script>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#content">{t('skip.content')}</a>
+    <slot />
+    <script>
+      // Kilau mengikuti kursor untuk elemen [data-glow]. Satu pendengar di dokumen, tidak perlu inisialisasi ulang.
+      document.addEventListener('pointermove', (event) => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const el = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-glow]');
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        el.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+        el.style.setProperty('--my', `${event.clientY - rect.top}px`);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+# Deploy ke GitHub Pages. Di GitHub: Settings, Pages, Source = "GitHub Actions".
+# Versi Node dibaca dari .nvmrc. Alamat penayangan diatur di src/site.config.ts (OLYPS_SITE dan OLYPS_BASE).
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Izin minimum. Job deploy menambah izin Pages sendiri.
+permissions:
+  contents: read
+
+# Satu deploy pada satu waktu. Deploy yang sedang berjalan tidak dibatalkan.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

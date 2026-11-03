@@ -1,0 +1,7 @@
+{
+  "_catatan": "Contoh struktur. Salin menjadi scripts/forbidden.local.json (di-ignore git) dan isi dengan daftar sebenarnya.",
+  "everywhere": ["CONTOH-KATA-TERLARANG"],
+  "institutionsOutsideAffiliations": ["CONTOH-NAMA-INSTITUSI"],
+  "claims": ["contoh klaim terlarang"],
+  "emails": ["contoh@example.invalid"]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "olyps-site",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:predeploy": "astro build && node scripts/predeploy-check.mjs"
+  },
+  "dependencies": {
+    "@lucide/astro": "^1.66.0",
+    "astro": "^7.4.5"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}

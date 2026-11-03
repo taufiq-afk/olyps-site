@@ -1,0 +1,20 @@
+---
+import HeroMedia from './HeroMedia.astro';
+
+interface Props {
+  /** Bagian poster yang ditampilkan, mis. "50% 20%". Berbeda per halaman. */
+  position?: string;
+}
+const { position = '50% 50%' } = Astro.props;
+---
+<!-- Slot banner pixel: poster diam dulu. Hanya satu video autoplay per halaman (pemutar HeroMedia menjaganya). -->
+<div class="page-banner">
+  <HeroMedia video={false} position={position} />
+</div>
+
+<style is:global>
+  .page-banner {
+    position: relative; height: clamp(8rem, 14vw, 13rem); margin-bottom: var(--space-6);
+    border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--border); background: var(--sunken);
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import { FlaskConical, HeartPulse, Leaf } from '@lucide/astro';
+import PageShell from '../../../components/PageShell.astro';
+import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
+import Related from '../../../components/Related.astro';
+import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
+import { useTranslations } from '../../../i18n/utils';
+import { siteLangs, type Lang } from '../../../site.config';
+
+export function getStaticPaths() {
+  return siteLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const entries = await getLocalized('research', lang);
+const items = await Promise.all(entries.map(async (entry) => ({ entry, related: await getRelated('research', entry.data.translationKey, lang) })));
+const icons = { health: HeartPulse, environment: Leaf };
+---
+<PageShell lang={lang} current="research" title={t('nav.research')} lead={t('def.research')} banner="50% 14%">
+  {items.length === 0 ? (
+    <div class="card empty"><p>{t('empty.research')}</p></div>
+  ) : (
+    <div class="card-grid">
+      {items.map(({ entry, related }) => {
+        const Icon = (entry.data.area && icons[entry.data.area]) || FlaskConical;
+        return (
+          <article class="card card--md research-card" id={entrySlug(entry.id)}>
+            <span class="icon-tile"><Icon size={26} aria-hidden="true" /></span>
+            <h2>{entry.data.title}</h2>
+            <p>{entry.data.summary}</p>
+            {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
+            <Related lang={lang} items={related} compact />
+          </article>
+        );
+      })}
+    </div>
+  )}
+</PageShell>
+
+<style>
+  .research-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); scroll-margin-top: calc(var(--capsule-h) + var(--space-6)); }
+  .empty { max-width: 36rem; }
+</style>

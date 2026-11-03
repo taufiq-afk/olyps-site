@@ -1,0 +1,21 @@
+{
+  "_catatan": "Pengaturan pemeriksa predeploy. Daftar kata terlarang TIDAK di sini, melainkan di scripts/forbidden.local.json (di-ignore git).",
+  "allowlist": [
+    "Project title to be decided",
+    "Judul proyek akan ditentukan",
+    "Research title to be decided",
+    "Judul riset akan ditentukan"
+  ],
+  "placeholderPatterns": ["placeholder", "to be decided", "akan ditentukan", "awaiting official", "menunggu teks resmi", "lorem ipsum", "example\\.com", "example\\.invalid"],
+  "maxFileBytes": 1500000,
+  "maxTotalBytes": 10000000,
+  "secretFiles": ["^\\.env($|\\.(?!example$))", "\\.pem$", "\\.key$", "\\.p12$", "(^|/)id_(rsa|dsa|ecdsa|ed25519)", "(^|/)credentials.*\\.json$"],
+  "secretContent": [
+    "AKIA[0-9A-Z]{16}",
+    "-----BEGIN [A-Z ]*PRIVATE KEY-----",
+    "ghp_[A-Za-z0-9]{30,}",
+    "github_pat_[A-Za-z0-9_]{30,}",
+    "sk-[A-Za-z0-9]{24,}",
+    "(api[_-]?key|secret|token|password)\\s*[:=]\\s*['\"][^'\"]{12,}['\"]"
+  ]
+}

@@ -1,0 +1,42 @@
+---
+import { BookOpen, FlaskConical, Users } from '@lucide/astro';
+import { type Lang } from '../../site.config';
+import { useTranslations } from '../../i18n/utils';
+import type { UiKey } from '../../i18n/ui';
+import Widget from '../Widget.astro';
+
+interface Props {
+  lang: Lang;
+  /** Jumlah entri yang tampil di Home (placeholder sudah disaring pada build produksi). */
+  counts: { research: number; publications: number; people: number };
+}
+const { lang, counts } = Astro.props;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const to = (key: string) => `${base}/${lang}/${key}/`;
+// Jumlah entri, atau keadaan kosong bila belum ada.
+const body = (kind: 'research' | 'publications' | 'people') => {
+  const n = counts[kind];
+  if (n === 0) return t('empty.nothing');
+  return t(`count.${kind}.${n === 1 ? 'one' : 'other'}` as UiKey).replace('{n}', String(n));
+};
+---
+<section class="explore" aria-labelledby="explore">
+  <div class="container explore__inner">
+    <h2 id="explore" class="reveal">{t('explore.title')}</h2>
+    <div class="explore__widgets">
+      <div class="reveal" data-reveal="left" style="--i:0"><Widget icon={FlaskConical} title={t('nav.research')} body={body('research')} href={to('research')} /></div>
+      <div class="reveal" style="--i:1"><Widget icon={BookOpen} title={t('nav.publications')} body={body('publications')} href={to('publications')} /></div>
+      <div class="reveal" data-reveal="right" style="--i:2"><Widget icon={Users} title={t('nav.people')} body={body('people')} href={to('people')} /></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .explore { padding-top: var(--stage-pad); color: var(--text); }
+  /* Tautan #explore: judul tidak boleh tertutup navbar. */
+  h2 { font-size: var(--text-title); margin-bottom: var(--space-7); scroll-margin-top: calc(var(--capsule-h) + var(--space-6)); }
+  .explore__widgets { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  .explore__widgets > div { display: flex; }
+  .explore__widgets :global(.widget) { flex: 1; }
+</style>

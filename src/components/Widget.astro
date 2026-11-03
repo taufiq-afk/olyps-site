@@ -1,0 +1,42 @@
+---
+import { ArrowUpRight } from '@lucide/astro';
+
+interface Props {
+  icon: any;
+  title: string;
+  body: string;
+  href: string;
+}
+const { icon: Icon, title, body, href } = Astro.props;
+---
+<a class="widget glass" href={href} data-glow>
+  <span class="widget__icon icon-tile"><Icon size={26} aria-hidden="true" /></span>
+  <h3 class="widget__title">{title}</h3>
+  <p class="widget__body">{body}</p>
+  <span class="widget__foot"><ArrowUpRight size={20} aria-hidden="true" /></span>
+</a>
+
+<style is:global>
+  .widget {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-3);
+    min-height: var(--card-h-md); padding: var(--card-pad-md); border-radius: var(--radius-card);
+    color: var(--text); text-decoration: none;
+    transition: transform 280ms var(--ease), box-shadow 280ms var(--ease), border-color 280ms var(--ease);
+  }
+  .widget__icon { transition: transform 280ms var(--ease); }
+  .widget__title { font-size: var(--text-lead); }
+  .widget__body { color: var(--text-muted); font-size: 0.95rem; }
+  .widget__foot { margin-top: auto; align-self: flex-end; color: var(--text-muted); display: inline-flex; transition: transform 280ms var(--ease), color 280ms var(--ease); }
+  .widget:hover, .widget:focus-visible {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1), 0 22px 44px rgb(0 0 0 / 0.22);
+  }
+  .widget:hover .widget__icon, .widget:focus-visible .widget__icon { transform: scale(1.08) rotate(-4deg); }
+  .widget:hover .widget__foot, .widget:focus-visible .widget__foot { transform: translate(2px, -2px); color: var(--accent); }
+  @media (prefers-reduced-motion: reduce) {
+    .widget, .widget__icon, .widget__foot { transition: none; }
+    .widget:hover, .widget:focus-visible { transform: none; }
+    .widget:hover .widget__icon, .widget:focus-visible .widget__icon, .widget:hover .widget__foot, .widget:focus-visible .widget__foot { transform: none; }
+  }
+</style>

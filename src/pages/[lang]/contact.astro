@@ -1,0 +1,21 @@
+---
+import { ExternalLink } from '@lucide/astro';
+import PageShell from '../../components/PageShell.astro';
+import { useTranslations } from '../../i18n/utils';
+import { siteConfig, siteLangs, type Lang } from '../../site.config';
+
+export function getStaticPaths() {
+  return siteLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+---
+<PageShell lang={lang} current="contact" title={t('nav.contact')} lead={t('page.contact.lead')} banner="50% 92%" split>
+  <!-- Satu-satunya jalur kontak adalah profil GitHub. Tidak ada email di situs. -->
+  <a class="card card--md card--link" data-glow href={siteConfig.contact.github} rel="noopener">
+    <h2>{t('contact.github')}</h2>
+    <p>{siteConfig.contact.github.replace('https://', '')}</p>
+    <span class="btn btn--primary">{t('contact.github.cta')}<ExternalLink size={18} aria-hidden="true" /></span>
+  </a>
+</PageShell>

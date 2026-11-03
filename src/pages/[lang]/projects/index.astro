@@ -1,0 +1,40 @@
+---
+import { ArrowUpRight, Folder } from '@lucide/astro';
+import PageShell from '../../../components/PageShell.astro';
+import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
+import { entrySlug, getLocalized } from '../../../i18n/content';
+import { useTranslations } from '../../../i18n/utils';
+import type { UiKey } from '../../../i18n/ui';
+import { siteLangs, type Lang } from '../../../site.config';
+
+export function getStaticPaths() {
+  return siteLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const items = await getLocalized('projects', lang);
+---
+<PageShell lang={lang} current="projects" title={t('nav.projects')} lead={t('def.projects')} banner="50% 52%">
+  {items.length === 0 ? (
+    <div class="card empty"><p>{t('empty.projects')}</p></div>
+  ) : (
+    <div class="card-grid">
+      {items.map((entry) => (
+        <a class="card card--md card--link" data-glow href={`${base}/${lang}/projects/${entrySlug(entry.id)}/`}>
+          <span class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
+          <h2>{entry.data.title}</h2>
+          <span class="badge badge--accent">{t(`status.${entry.data.status}` as UiKey)}</span>
+          <p>{entry.data.summary}</p>
+          {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
+          <ArrowUpRight class="card__arrow" size={22} aria-hidden="true" />
+        </a>
+      ))}
+    </div>
+  )}
+</PageShell>
+
+<style>
+  .empty { max-width: 36rem; }
+</style>

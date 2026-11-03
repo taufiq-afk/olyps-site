@@ -1,0 +1,75 @@
+---
+import { Sun, Moon, Monitor } from '@lucide/astro';
+import type { Lang, ThemeMode } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  /** Untuk halaman styleguide: tampilan statis tanpa perilaku. */
+  demoMode?: ThemeMode;
+}
+const { lang, demoMode } = Astro.props;
+const t = useTranslations(lang);
+const labels = { auto: t('theme.auto'), light: t('theme.light'), dark: t('theme.dark') };
+const mode = demoMode ?? 'auto';
+---
+<button
+  type="button"
+  class="theme-toggle"
+  data-mode={mode}
+  data-theme-toggle={demoMode ? undefined : ''}
+  data-labels={JSON.stringify(labels)}
+  data-prefix={t('theme.label')}
+  aria-label={`${t('theme.label')}: ${labels[mode]}`}
+  title={`${t('theme.label')}: ${labels[mode]}`}
+>
+  <Monitor class="i i-auto" size={20} aria-hidden="true" />
+  <Sun class="i i-light" size={20} aria-hidden="true" />
+  <Moon class="i i-dark" size={20} aria-hidden="true" />
+</button>
+
+<style is:global>
+  .theme-toggle {
+    flex: none; width: var(--tap); height: var(--tap); padding: 0;
+    display: inline-grid; place-items: center;
+    border-radius: 50%; border: 1px solid transparent;
+    background: transparent; color: var(--text); cursor: pointer;
+    transition: background-color 200ms var(--ease), transform 200ms var(--ease);
+  }
+  .theme-toggle:hover { background: color-mix(in srgb, var(--text) 10%, transparent); }
+  .theme-toggle .i { grid-area: 1 / 1; display: none; }
+  .theme-toggle[data-mode='auto'] .i-auto,
+  .theme-toggle[data-mode='light'] .i-light,
+  .theme-toggle[data-mode='dark'] .i-dark { display: block; }
+  @media (prefers-reduced-motion: reduce) { .theme-toggle { transition: none; } }
+</style>
+
+<script>
+  // Siklus: auto, terang, gelap. Ikon dan label mengikuti mode aktif.
+  type Api = { set(mode: string): void; modes: string[] };
+  const render = () => {
+    const mode = document.documentElement.getAttribute('data-theme-mode') ?? 'auto';
+    const theme = document.documentElement.getAttribute('data-theme') ?? '';
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
+      const labels = JSON.parse(btn.dataset.labels ?? '{}');
+      const label = mode === 'auto' ? `${labels.auto} (${labels[theme] ?? theme})` : labels[mode];
+      btn.dataset.mode = mode;
+      btn.setAttribute('aria-label', `${btn.dataset.prefix}: ${label}`);
+      btn.title = `${btn.dataset.prefix}: ${label}`;
+    });
+  };
+  const init = () => {
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]:not([data-bound])').forEach((btn) => {
+      btn.dataset.bound = '';
+      btn.addEventListener('click', () => {
+        const api = (window as unknown as { olypsTheme: Api }).olypsTheme;
+        const mode = document.documentElement.getAttribute('data-theme-mode') ?? 'auto';
+        api.set(api.modes[(api.modes.indexOf(mode) + 1) % api.modes.length]);
+      });
+    });
+    render();
+  };
+  document.addEventListener('olyps:theme', render);
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

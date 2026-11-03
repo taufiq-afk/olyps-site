@@ -1,0 +1,173 @@
+---
+import { siteConfig } from '../site.config';
+
+interface Props {
+  /** false: hanya poster. */
+  video?: boolean;
+  /** Selector elemen yang, bila keluar dari layar, berarti wallpaper tertutup penuh (video dijeda). */
+  cover?: string;
+  /** Menimpa --media-position untuk instans ini. */
+  position?: string;
+}
+const { video = true, cover, position } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const config = JSON.stringify({
+  light: { poster: siteConfig.hero.light.poster, video: siteConfig.hero.light.video },
+  dark: { poster: siteConfig.hero.dark.poster, video: siteConfig.hero.dark.video },
+});
+---
+<div
+  class="hero-media"
+  data-hero-media
+  data-video={video ? '' : undefined}
+  data-cover={cover}
+  data-base={base}
+  data-config={config}
+  style={position ? `--media-position:${position}` : undefined}
+  aria-hidden="true"
+>
+  <!-- Poster dimuat lewat skrip hanya untuk tema aktif, dan untuk tema lain saat tema berganti. -->
+  <div class="hero-media__layer" data-layer="dark"><img alt="" width="1920" height="1080" decoding="async" /></div>
+  <div class="hero-media__layer" data-layer="light"><img alt="" width="1920" height="1080" decoding="async" /></div>
+  <noscript><img class="hero-media__fallback" src={`${base}/${siteConfig.hero.light.poster}`} alt="" /></noscript>
+  <div class="hero-media__scrim"></div>
+</div>
+
+<style is:global>
+  .hero-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: var(--scrim-color); pointer-events: none; }
+  .hero-media__layer { position: absolute; inset: 0; opacity: 0; transition: opacity 600ms var(--ease); }
+  .hero-media[data-active='light'] [data-layer='light'],
+  .hero-media[data-active='dark'] [data-layer='dark'] { opacity: 1; }
+  .hero-media img, .hero-media video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: var(--media-position);
+    image-rendering: pixelated; /* tetap tajam saat diperbesar */
+  }
+  .hero-media video { opacity: 0; transition: opacity 500ms var(--ease); }
+  .hero-media video.is-playing { opacity: 1; }
+  /* Scrim tipis mengikuti tema (terang di tema terang, gelap di tema gelap). Gradasi kiri hanya menambah,
+     opasitas minimum tetap --scrim-base. */
+  .hero-media__scrim {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--scrim-color) 72%, transparent) 0%, color-mix(in srgb, var(--scrim-color) 38%, transparent) 42%, transparent 80%),
+      var(--scrim-base);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-media__layer, .hero-media video { transition: none; }
+  }
+</style>
+
+<script>
+  // Pemutar wallpaper: poster dan video mengikuti tema, video dijeda saat tertutup, tab tidak aktif,
+  // atau dijeda pengunjung. Reduced motion dan Save-Data hanya menampilkan poster.
+  type Theme = 'light' | 'dark';
+  type Config = Record<Theme, { poster: string; video: string }>;
+  type Inst = { el: HTMLElement; base: string; cfg: Config; theme?: Theme; video?: HTMLVideoElement; covered: boolean };
+
+  const KEY = 'olyps-video';
+  const insts = new Set<Inst>();
+  const readPaused = () => { try { return localStorage.getItem(KEY) === 'paused'; } catch { return false; } };
+  let userPaused = readPaused();
+
+  const allowed = () =>
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData !== true;
+  const themeOf = (el: HTMLElement): Theme =>
+    (el.closest('[data-theme]') as HTMLElement | null)?.dataset.theme === 'dark' ? 'dark' : 'light';
+
+  const sync = (inst: Inst) => {
+    const v = inst.video;
+    if (!v) return;
+    if (allowed() && !userPaused && !inst.covered && !document.hidden) v.play().catch(() => {});
+    else v.pause();
+  };
+
+  const loadPoster = (inst: Inst, theme: Theme) => {
+    const img = inst.el.querySelector<HTMLImageElement>(`[data-layer="${theme}"] img`);
+    if (!img || img.getAttribute('src')) return;
+    const jpg = `${inst.base}/${inst.cfg[theme].poster}`;
+    img.onerror = () => { img.onerror = null; img.src = jpg; };
+    img.src = jpg.replace(/\.jpg$/, '.webp');
+  };
+
+  const setSources = (inst: Inst, theme: Theme) => {
+    const v = inst.video;
+    if (!v) return;
+    v.classList.remove('is-playing');
+    v.replaceChildren();
+    [['webm', 'video/webm'], ['mp4', 'video/mp4']].forEach(([ext, type]) => {
+      const source = document.createElement('source');
+      source.src = `${inst.base}/${inst.cfg[theme].video}.${ext}`;
+      source.type = type;
+      v.appendChild(source);
+    });
+    v.load();
+    sync(inst);
+  };
+
+  // Ganti tema: poster crossfade, video memudar keluar lalu sumber diganti dan memudar masuk.
+  const applyTheme = (inst: Inst) => {
+    const theme = themeOf(inst.el);
+    if (inst.theme === theme) return;
+    const first = inst.theme === undefined;
+    inst.theme = theme;
+    loadPoster(inst, theme);
+    inst.el.dataset.active = theme;
+    if (!inst.video) return;
+    if (first) setSources(inst, theme);
+    else {
+      inst.video.classList.remove('is-playing');
+      window.setTimeout(() => setSources(inst, theme), 350);
+    }
+  };
+
+  const renderToggles = () => {
+    document.querySelectorAll<HTMLButtonElement>('[data-media-toggle]').forEach((btn) => {
+      btn.hidden = !allowed();
+      const state = userPaused ? 'paused' : 'playing';
+      btn.dataset.state = state;
+      btn.setAttribute('aria-label', (state === 'paused' ? btn.dataset.labelPlay : btn.dataset.labelPause) ?? '');
+    });
+  };
+
+  const init = () => {
+    insts.forEach((inst) => { if (!inst.el.isConnected) insts.delete(inst); });
+    document.querySelectorAll<HTMLElement>('[data-hero-media]:not([data-media-ready])').forEach((el) => {
+      el.dataset.mediaReady = '';
+      const inst: Inst = { el, base: el.dataset.base ?? '', cfg: JSON.parse(el.dataset.config ?? '{}'), covered: false };
+      insts.add(inst);
+      // Hanya satu video autoplay per halaman: instans video pertama yang dipakai.
+      if (el.hasAttribute('data-video') && allowed() && !document.querySelector('[data-hero-media] video')) {
+        const v = document.createElement('video');
+        v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.preload = 'metadata'; v.tabIndex = -1;
+        v.setAttribute('aria-hidden', 'true');
+        v.addEventListener('playing', () => v.classList.add('is-playing'));
+        el.insertBefore(v, el.querySelector('.hero-media__scrim'));
+        inst.video = v;
+      }
+      applyTheme(inst);
+      // Tertutup penuh oleh lembar bila elemen "cover" sudah lewat di atas layar (margin 32px untuk sudut melengkung).
+      const coverEl = (el.dataset.cover && document.querySelector(el.dataset.cover)) || el;
+      new IntersectionObserver(
+        ([entry]) => { inst.covered = !entry.isIntersecting; sync(inst); },
+        { rootMargin: el.dataset.cover ? '32px 0px 0px 0px' : '0px', threshold: el.dataset.cover ? 0 : 0.05 },
+      ).observe(coverEl);
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-media-toggle]:not([data-bound])').forEach((btn) => {
+      btn.dataset.bound = '';
+      btn.addEventListener('click', () => {
+        userPaused = !userPaused;
+        try { localStorage.setItem(KEY, userPaused ? 'paused' : 'playing'); } catch { /* abaikan */ }
+        renderToggles();
+        insts.forEach(sync);
+      });
+    });
+    renderToggles();
+  };
+
+  document.addEventListener('olyps:theme', () => insts.forEach(applyTheme));
+  document.addEventListener('visibilitychange', () => insts.forEach(sync));
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

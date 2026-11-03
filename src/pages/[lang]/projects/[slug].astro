@@ -1,0 +1,58 @@
+---
+import { render } from 'astro:content';
+import { ArrowLeft } from '@lucide/astro';
+import PageShell from '../../../components/PageShell.astro';
+import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
+import MediaSlot from '../../../components/MediaSlot.astro';
+import Related from '../../../components/Related.astro';
+import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
+import { useTranslations } from '../../../i18n/utils';
+import type { UiKey } from '../../../i18n/ui';
+import { siteLangs, type Lang } from '../../../site.config';
+
+export async function getStaticPaths() {
+  const paths = [];
+  for (const lang of siteLangs) {
+    for (const entry of await getLocalized('projects', lang)) {
+      paths.push({ params: { lang, slug: entrySlug(entry.id) }, props: { entry } });
+    }
+  }
+  return paths;
+}
+
+const lang = Astro.params.lang as Lang;
+const { entry } = Astro.props;
+const t = useTranslations(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { Content } = await render(entry);
+const related = await getRelated('projects', entry.data.translationKey, lang);
+---
+<PageShell lang={lang} current="projects" title={entry.data.title} banner="50% 52%">
+  <a class="back-link" href={`${base}/${lang}/projects/`}><ArrowLeft size={18} aria-hidden="true" />{t('projects.back')}</a>
+  <div class="detail">
+    <article class="detail__main">
+      <div class="detail__meta">
+        <span class="badge badge--accent">{t(`status.${entry.data.status}` as UiKey)}</span>
+        {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
+      </div>
+      <p class="detail__summary">{entry.data.summary}</p>
+      <div class="prose"><Content /></div>
+      <Related lang={lang} items={related} />
+    </article>
+    <aside class="detail__aside">
+      <MediaSlot lang={lang} poster={entry.data.mediaPoster} video={entry.data.mediaVideo} captions={entry.data.mediaCaptions} caption={entry.data.caption} />
+    </aside>
+  </div>
+</PageShell>
+
+<style is:global>
+  .back-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--tap); margin-bottom: var(--space-3); color: var(--text-muted); text-decoration: none; font-weight: 500; }
+  .back-link:hover { color: var(--text); }
+  .detail { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 56rem) { .detail { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } .detail__aside { position: sticky; top: calc(var(--capsule-h) + var(--space-6)); } }
+  .detail__meta { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+  .detail__summary { font-size: var(--text-lead); max-width: var(--measure); }
+  .prose { margin-top: var(--space-5); max-width: var(--measure); }
+  .prose h2 { font-size: var(--text-lead); margin: var(--space-5) 0 var(--space-2); }
+  .prose p { color: var(--text-muted); }
+</style>
