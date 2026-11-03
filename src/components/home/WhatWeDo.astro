@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   <div class="container">
     <h2 id="what-title" class="reveal">{t('home.what.title')}</h2>
     {projects.length === 0 ? (
-      <div class="card card--lg what__empty reveal"><p>{t('empty.featured')}</p></div>
+      <p class="what__empty reveal">{t('empty.featured')}</p>
     ) : (
       <div class="areas">
         {projects.map((project, i) => (
@@ -41,5 +41,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   .areas { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
   .card h3 { font-size: var(--text-lead); }
   .card p { color: var(--text-muted); }
-  .what__empty { max-width: 36rem; }
+  /* Keadaan kosong ringkas: satu baris, tanpa kartu. */
+  .what__empty { color: var(--text-muted); max-width: var(--measure); }
 </style>

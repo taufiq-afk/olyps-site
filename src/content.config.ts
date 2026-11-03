@@ -55,7 +55,10 @@ const people = collection('people', {
   skills: z.array(z.string()).default([]),
   // Institusi hanya boleh diisi di sini, dari teks resmi pemilik situs.
   affiliations: z.array(z.string()).default([]),
+  // Tautan profil opsional (mis. LinkedIn, Google Scholar, GitHub pribadi). Kosong: tidak dirender.
   links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+  // Foto opsional, path relatif ke public/. Hanya dengan izin orangnya. Kosong: avatar tetap inisial.
+  photo: z.string().optional(),
   relatedResearch: keys,
   relatedProjects: keys,
   relatedPublications: keys,

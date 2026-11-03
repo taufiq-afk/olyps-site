@@ -34,16 +34,16 @@ export const siteConfig = {
   shortName: 'OLYPS',
   // Jangan klaim status institusi resmi (lihat aturan di CLAUDE.md).
   descriptor: {
-    en: 'An independent research initiative',
-    id: 'Inisiatif riset independen',
+    en: 'An independent space for applied AI',
+    id: 'Ruang independen untuk AI terapan',
   },
   tagline: {
     en: 'Applied AI for health and the environment.',
     id: 'AI terapan untuk kesehatan dan lingkungan.', // PLACEHOLDER: terjemahan sementara
   },
   description: {
-    en: 'OLYPS is an independent research initiative working on applied AI for health and the environment.',
-    id: 'OLYPS adalah inisiatif riset independen yang mengerjakan AI terapan untuk kesehatan dan lingkungan.',
+    en: 'OLYPS is an independent space for learning and exploring applied AI for health and the environment.',
+    id: 'OLYPS adalah ruang belajar dan eksplorasi AI terapan untuk kesehatan dan lingkungan.',
   },
 
   // GitHub Pages (project site). Dibaca oleh astro.config.mjs. URL absolut Open Graph dan hreflang memakai `site`.
@@ -145,10 +145,6 @@ export const siteConfig = {
   },
 
   disclaimers: {
-    pixelVideo: {
-      en: 'Concept exploration. Visuals are illustrative and all rupiah figures are assumptions without field data.',
-      id: 'Eksplorasi konsep. Visual adalah ilustrasi dan semua angka rupiah adalah asumsi tanpa data lapangan.',
-    },
     placeholder: {
       en: 'Placeholder text, not final.',
       id: 'Teks placeholder, belum final.',

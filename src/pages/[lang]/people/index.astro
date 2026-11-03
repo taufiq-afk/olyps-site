@@ -1,5 +1,6 @@
 ---
 import PageShell from '../../../components/PageShell.astro';
+import Avatar from '../../../components/Avatar.astro';
 import { entrySlug, getLocalized } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
 import { siteLangs, type Lang } from '../../../site.config';
@@ -12,11 +13,7 @@ const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const people = await getLocalized('people', lang);
-// Satu grid kompak, kartu sama untuk semua.
-const initials = (name: string) => {
-  const parts = name.split(/\s+/).filter(Boolean);
-  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
-};
+// Satu grid kompak, kartu sama untuk semua. Afiliasi tidak ditampilkan di kartu, hanya di halaman profil.
 ---
 <PageShell lang={lang} current="people" title={t('nav.people')} banner="82% 88%">
   {people.length === 0 ? (
@@ -25,7 +22,7 @@ const initials = (name: string) => {
     <div class="people-grid">
       {people.map((person) => (
         <a class="card card--sm card--link person" data-glow href={`${base}/${lang}/people/${entrySlug(person.id)}/`}>
-          <span class="avatar" role="img" aria-label={person.data.name}>{initials(person.data.name)}</span>
+          <Avatar name={person.data.name} photo={person.data.photo} />
           <h2>{person.data.name}</h2>
           <p class="person__role">{person.data.role}</p>
         </a>
@@ -40,10 +37,4 @@ const initials = (name: string) => {
   .person { align-items: flex-start; }
   .person h2 { font-size: 1.05rem; line-height: 1.25; }
   .person__role { font-size: var(--text-small); }
-  .avatar {
-    flex: none; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%;
-    background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent);
-    border: 1px dashed var(--accent); font-weight: 700; letter-spacing: 0.04em;
-  }
-  .avatar--lg { width: 6rem; height: 6rem; font-size: 2rem; }
 </style>

@@ -17,7 +17,9 @@ skills:
   - brain MRI
   - histopathology
   - foundation models
-affiliations: []
+affiliations:
+  - Magister Kecerdasan Artifisial, Institut Teknologi Bandung
+  - Sarjana Informatika (S.Kom.), Telkom University
 order: 1
 placeholder: false
 ---

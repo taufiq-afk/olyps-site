@@ -1,0 +1,25 @@
+---
+interface Props {
+  name: string;
+  /** Path foto relatif ke public/. Kosong: tampilkan inisial. */
+  photo?: string;
+  large?: boolean;
+}
+const { name, photo, large = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const parts = name.split(/\s+/).filter(Boolean);
+const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+---
+{photo
+  ? <img class:list={['avatar', 'avatar--photo', large && 'avatar--lg']} src={`${base}/${photo}`} alt={name} width="96" height="96" loading="lazy" decoding="async" />
+  : <span class:list={['avatar', large && 'avatar--lg']} role="img" aria-label={name}>{initials}</span>}
+
+<style is:global>
+  .avatar {
+    flex: none; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent);
+    border: 1px dashed var(--accent); font-weight: 700; letter-spacing: 0.04em;
+  }
+  .avatar--lg { width: 6rem; height: 6rem; font-size: 2rem; }
+  .avatar--photo { object-fit: cover; border-style: solid; border-color: var(--border-strong); }
+</style>

@@ -39,9 +39,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     )}
   </div>
 
-  <!-- Wallpaper adalah ilustrasi pixel, jadi keterangan konsep selalu tampil di dekat hero. -->
-  <p class="hero__note">{siteConfig.disclaimers.pixelVideo[lang]}</p>
-
   <button
     type="button"
     class="media-toggle glass"
@@ -83,12 +80,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   .hero__card :global(.hero__card-arrow) { margin-top: auto; align-self: flex-end; color: var(--text-muted); }
   @media (prefers-reduced-motion: reduce) { .hero__card, .hero__card:hover, .hero__card:focus-visible { transition: none; transform: none; } }
 
-  /* Keterangan konsep sejajar dengan tepi konten, di sisi berlawanan tombol jeda. */
-  .hero__note {
-    position: absolute; bottom: var(--space-6); max-width: min(34rem, calc(100% - 2 * var(--gutter) - 4rem));
-    left: calc((100% - min(100% - 2 * var(--gutter), var(--container-max))) / 2);
-    font-size: var(--text-small); color: var(--text-muted);
-  }
   .media-toggle {
     position: absolute; bottom: var(--space-5);
     right: calc((100% - min(100% - 2 * var(--gutter), var(--container-max))) / 2);

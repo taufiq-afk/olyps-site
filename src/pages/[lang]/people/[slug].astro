@@ -1,6 +1,7 @@
 ---
-import { ArrowLeft } from '@lucide/astro';
+import { ArrowLeft, ExternalLink } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
+import Avatar from '../../../components/Avatar.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
 import Related from '../../../components/Related.astro';
 import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
@@ -22,20 +23,28 @@ const { entry } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const related = await getRelated('people', entry.data.translationKey, lang);
-const parts = entry.data.name.split(/\s+/).filter(Boolean);
-const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 ---
 <PageShell lang={lang} current="people" title={entry.data.name} banner="82% 88%">
   <a class="back-link" href={`${base}/${lang}/people/`}><ArrowLeft size={18} aria-hidden="true" />{t('people.back')}</a>
   <article class="profile">
-    <span class="avatar avatar--lg" role="img" aria-label={entry.data.name}>{initials}</span>
+    <Avatar name={entry.data.name} photo={entry.data.photo} large />
     <div class="profile__main">
       <p class="profile__role">{entry.data.role}{entry.data.placeholder && <Fragment> <PlaceholderBadge lang={lang} /></Fragment>}</p>
       <p class="profile__bio">{entry.data.bio}</p>
       {entry.data.affiliations.length > 0 && (
         <section class="profile__block" data-affiliations>
           <h2>{t('people.affiliations')}</h2>
-          <p>{entry.data.affiliations.join(', ')}</p>
+          <ul class="affiliations">{entry.data.affiliations.map((item) => <li>{item}</li>)}</ul>
+        </section>
+      )}
+      {entry.data.links.length > 0 && (
+        <section class="profile__block">
+          <h2>{t('people.links')}</h2>
+          <ul class="profile__links">
+            {entry.data.links.map((link) => (
+              <li><a href={link.url} rel="noopener">{link.label}<ExternalLink size={14} aria-hidden="true" /></a></li>
+            ))}
+          </ul>
         </section>
       )}
       {entry.data.skills.length > 0 && (
@@ -56,5 +65,8 @@ const initials = (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] :
   .profile__bio { margin-top: var(--space-3); max-width: var(--measure); color: var(--text-muted); }
   .profile__block { margin-top: var(--space-5); }
   .profile__block h2 { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }
+  .affiliations { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+  .profile__links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+  .profile__links a { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap); color: var(--accent); }
   .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
 </style>
