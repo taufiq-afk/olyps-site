@@ -1,32 +1,37 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { Play } from '@lucide/astro';
 import type { Lang } from '../site.config';
 import { useTranslations } from '../i18n/utils';
 
 interface Props {
   lang: Lang;
-  /** Path poster relatif ke public/. */
-  poster?: string;
-  /** Nama dasar klip tanpa ekstensi (.mp4 dan .webm di public/). Belum ada: hanya poster. */
+  /** Gambar dari src/assets/projects (diproses Astro). */
+  image?: ImageMetadata;
+  /** Teks alternatif gambar. Kosong: gambar dianggap dekoratif. */
+  alt?: string;
+  /** Keterangan dari konten. Kosong: tidak ada keterangan. */
+  caption?: string;
+  /** Nama dasar klip tanpa ekstensi (.mp4 dan .webm di public/). Kosong: tidak ada video dan tidak ada tulisan tentangnya. */
   video?: string;
   /** Berkas VTT untuk bahasa halaman ini. */
   captions?: string;
-  caption?: string;
 }
-const { lang, poster, video, captions, caption } = Astro.props;
+const { lang, image, alt = '', caption, video, captions } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <figure class="media-slot" data-media-slot data-base={base} data-video={video} data-captions={captions} data-lang={lang}>
   <div class="media-slot__frame">
-    {poster ? <img src={`${base}/${poster}`} alt="" width="1280" height="720" /> : <div class="media-slot__empty"></div>}
+    {image ? <Image src={image} alt={alt} quality={90} /> : <div class="media-slot__empty"></div>}
     {video && (
       <button type="button" class="media-slot__play glass" data-slot-play aria-label={t('media.slot.play')}>
         <Play size={22} aria-hidden="true" />
       </button>
     )}
   </div>
-  <figcaption class="media-slot__caption">{caption}{!video && <span class="media-slot__note"> {t('media.slot.note')}</span>}</figcaption>
+  {caption && <figcaption class="media-slot__caption">{caption}</figcaption>}
 </figure>
 
 <style is:global>

@@ -3,10 +3,10 @@ import { render } from 'astro:content';
 import { ArrowLeft } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
+import Timeline from '../../../components/Timeline.astro';
 import Related from '../../../components/Related.astro';
 import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
-import type { UiKey } from '../../../i18n/ui';
 import { siteLangs, type Lang } from '../../../site.config';
 
 export async function getStaticPaths() {
@@ -33,13 +33,13 @@ const related = all.filter((r) => r.kind !== 'people');
   <a class="back-link" href={`${base}/${lang}/research/`}><ArrowLeft size={18} aria-hidden="true" />{t('research.back')}</a>
   <article class="detail detail--single">
     <div class="detail__meta">
-      {entry.data.status && <span class="badge badge--accent">{t(`research.status.${entry.data.status}` as UiKey)}</span>}
       {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
     </div>
     {authors.length > 0 && (
       <p class="detail__by">{t('research.by')} {authors.map((a, i) => <Fragment>{i > 0 && ', '}<a href={a.href}>{a.title}</a></Fragment>)}</p>
     )}
     <p class="detail__summary">{entry.data.summary}</p>
+    <Timeline lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} leadsTo={entry.data.leadsTo} leadsToUrl={entry.data.leadsToUrl} />
     <div class="prose"><Content /></div>
     <Related lang={lang} items={related} />
   </article>

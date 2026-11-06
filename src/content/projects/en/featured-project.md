@@ -4,9 +4,9 @@ translationKey: featured-project
 title: Project title to be decided
 summary: "A concept exploration of an intelligent recovered-paper sorting facility, imagined to study how computer vision could fit into a real workflow. It is a concept, not an operating system, and all figures are assumptions."
 status: concept
-caption: "Concept exploration. Visuals are illustrative, rupiah figures are assumptions."
-mediaPoster: media/olyps-hero-poster.webp
-order: 1
+image: /src/assets/projects/featured-project.webp
+imageCaption: "Concept exploration. Visuals are illustrative."
+order: 2
 placeholder: false
 relatedResearch:
   - recovered-paper-contamination

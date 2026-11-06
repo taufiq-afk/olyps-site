@@ -12,11 +12,11 @@ i18n:
   locales: [en, id]
   default_locale: en
 
-# Unggahan foto masuk src/assets/people (diproses Astro, bukan public/).
+# Unggahan masuk src/assets/<jenis>/ (people, research, projects), diproses Astro, bukan public/. Folder diatur per koleksi di bawah.
 # Batas: 1.500.000 byte per berkas (sama dengan maxFileBytes di scripts/predeploy.config.json).
-# Tiap jenis konten punya folder sendiri (people, research, projects), diatur per koleksi di bawah.
-# Setelah menyimpan, integrations/dev-admin.mjs merapikan unggahan: nama dari slug entri (mis. taufiq.webp),
-# webp, maksimum 1024 px dan 1.500.000 byte, tanpa EXIF atau GPS (scripts/tidy-assets.mjs, atau `npm run tidy:assets`).
+# Admin mengecilkan ke webp maksimum 1920 px. Setelah menyimpan, integrations/dev-admin.mjs menjalankan scripts/tidy-assets.mjs
+# (atau manual: npm run tidy:assets): nama berkas menjadi slug entri (mis. taufiq.webp), people maksimum 1024 px,
+# research dan projects 1920 px, tanpa EXIF atau GPS.
 media_folder: /src/assets/people
 public_folder: /src/assets/people
 media_libraries:
@@ -28,153 +28,15 @@ media_libraries:
         raster_image:
           format: webp
           quality: 85
-          width: 1024
-          height: 1024
+          width: 1920
+          height: 1920
 
+
+# Urutan menu mengikuti situs: Home (unggulan), Projects, Research, Publications, People, Contact. Tab Assets bawaan Sveltia ada di akhir.
+# Urutan field di tiap koleksi mengikuti urutan tampil di halaman (atas ke bawah), lalu field penerbitan di bagian bawah.
 collections:
-  - name: people
-    label: People
-    label_singular: Person
-    folder: src/content/people
-    i18n: true
-    format: yaml-frontmatter
-    extension: md
-    slug: '{{translationKey}}'
-    create: true
-    summary: '{{name}} ({{role}})'
-    media_folder: /src/assets/people
-    public_folder: /src/assets/people
-    fields:
-      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
-      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
-      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
-      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
-      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
-      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
-      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
-      - { name: name, label: Name, widget: string, i18n: duplicate }
-      - { name: role, label: Role, widget: string, i18n: true }
-      - { name: bio, label: Bio, widget: text, i18n: true }
-      - { name: skills, label: Skills, widget: list, required: false, i18n: duplicate }
-      - { name: affiliations, label: Affiliations, widget: list, required: false, i18n: true }
-      - name: links
-        label: Links (open in a new tab)
-        widget: list
-        required: false
-        i18n: duplicate
-        fields:
-          - { name: label, label: Label, widget: string }
-          - { name: url, label: URL, widget: string }
-      # Foto hanya dengan izin orangnya. Path ke src/assets/people (nama dirapikan otomatis menjadi <slug>.webp).
-      - { name: photo, label: Photo (only with permission), widget: image, required: false, i18n: duplicate }
-      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-
-  - name: research
-    label: Research
-    label_singular: Research entry
-    folder: src/content/research
-    i18n: true
-    format: yaml-frontmatter
-    extension: md
-    slug: '{{translationKey}}'
-    create: true
-    summary: '{{title}}'
-    media_folder: /src/assets/research
-    public_folder: /src/assets/research
-    fields:
-      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
-      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
-      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
-      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
-      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
-      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
-      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
-      - { name: title, label: Title, widget: string, i18n: true }
-      - { name: summary, label: Summary, widget: text, i18n: true }
-      - { name: area, label: Area, widget: select, options: [health, environment], required: false, i18n: duplicate }
-      - { name: status, label: Status, widget: select, options: [exploratory, ongoing, completed], required: false, i18n: duplicate }
-      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
-      # Badan Markdown. Bagian yang dipakai: Question or hypothesis, Methods, Findings. Bagian yang tidak ditulis tidak dirender.
-      - { name: body, label: Body, widget: markdown, required: false, i18n: true }
-
-  - name: projects
-    label: Projects
-    label_singular: Project
-    folder: src/content/projects
-    i18n: true
-    format: yaml-frontmatter
-    extension: md
-    slug: '{{translationKey}}'
-    create: true
-    summary: '{{title}}'
-    media_folder: /src/assets/projects
-    public_folder: /src/assets/projects
-    fields:
-      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
-      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
-      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
-      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
-      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
-      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
-      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
-      - { name: title, label: Title, widget: string, i18n: true }
-      - { name: summary, label: Summary, widget: text, i18n: true }
-      - { name: status, label: Status, widget: select, options: [in-progress, planned, concept], i18n: duplicate }
-      - { name: caption, label: Caption, widget: string, required: false, i18n: true }
-      # Media di folder public/media (bukan unggahan admin): isi path tanpa garis miring awal, mis. media/olyps-hero-poster.webp.
-      - { name: mediaPoster, label: Media poster (path in public/), widget: string, required: false, i18n: duplicate }
-      - { name: mediaVideo, label: Media video (base name, no extension), widget: string, required: false, i18n: duplicate }
-      - { name: mediaCaptions, label: Media captions (VTT for this language), widget: string, required: false, i18n: true }
-      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
-      # Badan Markdown. Bagian yang dipakai: Goal, Scope, Roadmap, Impact. Roadmap dan Impact opsional. Bagian yang tidak ditulis tidak dirender.
-      - { name: body, label: Body, widget: markdown, required: false, i18n: true }
-
-  - name: publications
-    label: Publications
-    label_singular: Publication
-    folder: src/content/publications
-    i18n: true
-    format: yaml-frontmatter
-    extension: md
-    slug: '{{translationKey}}'
-    create: true
-    summary: '{{title}} ({{year}})'
-    fields:
-      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
-      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
-      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
-      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
-      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
-      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
-      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
-      - { name: title, label: Title, widget: string, i18n: true }
-      # Penulis: teks biasa, atau pilih anggota (personKey) agar nama menaut ke profil.
-      - name: authors
-        label: Authors
-        widget: list
-        i18n: duplicate
-        summary: '{{name}}'
-        fields:
-          - { name: name, label: Name as printed, widget: string }
-          - { name: personKey, label: Member (optional, links to profile), widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], required: false }
-      - { name: venue, label: Venue, widget: string, i18n: duplicate }
-      - { name: year, label: Year, widget: number, value_type: int, i18n: duplicate }
-      - { name: pages, label: Pages, widget: string, required: false, i18n: duplicate }
-      - { name: doi, label: DOI (without URL), widget: string, required: false, i18n: duplicate }
-      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
-      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
-
-  # Daftar unggulan (src/data/featured.json): larik translationKey proyek, berurutan. Butir pertama menjadi kartu hero.
-  # Formulir menolak lebih dari 3 butir (max) dan hanya menawarkan proyek yang ada. Key ganda ditolak oleh build.
-  - name: settings
-    label: Settings
+  - name: home
+    label: "Home: featured projects"
     files:
       - name: featured
         label: Featured projects
@@ -187,4 +49,489 @@ collections:
             root: true
             min: 0
             max: 3
-            field: { name: key, label: Project, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title] }
+            hint: 'Top to bottom: the first becomes the hero card on Home, the rest follow in "What we work on". Drag the handle (mouse) or use Move Up and Move Down to reorder. Maximum 3. The same project twice is rejected by the build.'
+            field:
+              name: key
+              label: Project
+              widget: relation
+              collection: projects
+              value_field: translationKey
+              search_fields:
+                - title
+                - translationKey
+              display_fields:
+                - title
+  - name: projects
+    label: Projects
+    label_singular: Project
+    folder: src/content/projects
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: "{{translationKey}}"
+    create: true
+    summary: "{{title}}"
+    media_folder: /src/assets/projects
+    public_folder: /src/assets/projects
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        i18n: true
+        hint: Page title and card heading.
+      - &a1
+        name: placeholder
+        label: Placeholder
+        widget: boolean
+        default: true
+        i18n: duplicate
+        hint: Shows a "Placeholder" badge. Entries marked as placeholder are hidden from the whole site on production builds. Turn off when the text is final.
+      - name: summary
+        label: Summary
+        widget: text
+        i18n: true
+        hint: One or two sentences, shown on cards and under the title.
+      - &a2
+        name: status
+        label: Status
+        widget: select
+        options:
+          - concept
+          - exploratory
+          - ongoing
+          - paused
+          - completed
+        i18n: duplicate
+        hint: Shown on cards and in the Timeline block.
+      - &a3
+        name: startDate
+        label: Start date
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^\d{4}-(0[1-9]|1[0-2])$
+          - Use YYYY-MM, for example 2026-11
+        hint: Optional, format YYYY-MM (for example 2026-11). Shown as "Since Nov 2026".
+      - &a4
+        name: endDate
+        label: End date
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^\d{4}-(0[1-9]|1[0-2])$
+          - Use YYYY-MM, for example 2027-03
+        hint: Format YYYY-MM. Required when status is completed, optional when paused, never before the start date. The form cannot enforce this; the build rejects it.
+      - &a5
+        name: leadsTo
+        label: Continues as
+        widget: list
+        required: false
+        i18n: duplicate
+        hint: Optional. translationKey of a project, research, or publication this work continues as (not itself). One key per row. The build rejects keys that do not exist.
+      - &a6
+        name: leadsToUrl
+        label: Continues at (URL)
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^https?://\S+$
+          - Use a full URL starting with https://
+        hint: Optional external link shown under "Continues as". Opens in a new tab.
+      - name: body
+        label: Body
+        widget: markdown
+        required: false
+        i18n: true
+        hint: "Sections used: Goal, Scope, Roadmap, Impact. Roadmap and Impact are optional: leave them out and they are not shown."
+      - name: relatedPeople
+        label: Members
+        widget: relation
+        collection: people
+        value_field: translationKey
+        search_fields:
+          - name
+          - translationKey
+        display_fields:
+          - name
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: People who work on this project. Shown in the Related section.
+      - &a12
+        name: relatedResearch
+        label: Related research
+        widget: relation
+        collection: research
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - &a7
+        name: relatedPublications
+        label: Related publications
+        widget: relation
+        collection: publications
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - name: image
+        label: Image
+        widget: image
+        required: false
+        i18n: duplicate
+        hint: Optional picture in the right column. Upload goes to src/assets/projects and is renamed to the entry slug, converted to webp, resized to 1920 px, and stripped of metadata. Max 1,500,000 bytes. Leave empty to hide the media slot.
+      - name: imageAlt
+        label: Image alt text
+        widget: string
+        required: false
+        i18n: true
+        hint: Describes the image for screen readers. Leave empty only if the image is purely decorative.
+      - name: imageCaption
+        label: Image caption
+        widget: string
+        required: false
+        i18n: true
+        hint: Optional line under the image. Empty means no caption.
+      - name: mediaVideo
+        label: Video (base name)
+        widget: string
+        required: false
+        i18n: duplicate
+        hint: Advanced. Base name of a clip already in public/ (without .mp4 or .webm). Video upload is not available in this admin yet.
+      - name: mediaCaptions
+        label: Video captions (VTT)
+        widget: string
+        required: false
+        i18n: true
+        hint: Advanced. Path of the VTT file for this language, relative to public/.
+      - &a8
+        name: order
+        label: Order
+        widget: number
+        value_type: int
+        required: false
+        i18n: duplicate
+        hint: "Optional. Smaller numbers appear first. Empty entries come last, then newest start date (publications: newest year), then title."
+      - &a9
+        name: draft
+        label: Draft
+        widget: boolean
+        default: false
+        i18n: duplicate
+        hint: Drafts are never published, in development or production.
+      - &a10
+        name: translationKey
+        label: Translation key
+        widget: string
+        i18n: duplicate
+        pattern: &a14
+          - ^[a-z0-9-]+$
+          - Lowercase letters, digits, and hyphens only
+        hint: Identifier shared by the EN and ID versions and used by relations. Also the file name. Do not change it after publishing.
+      - &a11
+        name: lang
+        label: Language
+        widget: hidden
+        default: "{{locale}}"
+        i18n: true
+  - name: research
+    label: Research
+    label_singular: Research entry
+    folder: src/content/research
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: "{{translationKey}}"
+    create: true
+    summary: "{{title}}"
+    media_folder: /src/assets/research
+    public_folder: /src/assets/research
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        i18n: true
+        hint: Page title and card heading.
+      - *a1
+      - name: relatedPeople
+        label: Authors
+        widget: relation
+        collection: people
+        value_field: translationKey
+        search_fields:
+          - name
+          - translationKey
+        display_fields:
+          - name
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: People shown as "By ..." under the title.
+      - name: summary
+        label: Summary
+        widget: text
+        i18n: true
+        hint: One or two sentences, shown on cards and under the title.
+      - *a2
+      - *a3
+      - *a4
+      - *a5
+      - *a6
+      - name: body
+        label: Body
+        widget: markdown
+        required: false
+        i18n: true
+        hint: "Sections used: Question or hypothesis, Methods, Findings. Leave a section out and it is not shown."
+      - &a13
+        name: relatedProjects
+        label: Related projects
+        widget: relation
+        collection: projects
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - *a7
+      - name: area
+        label: Area
+        widget: select
+        options:
+          - health
+          - environment
+        required: false
+        i18n: duplicate
+        hint: Optional topic area. Not displayed yet.
+      - *a8
+      - *a9
+      - *a10
+      - *a11
+  - name: publications
+    label: Publications
+    label_singular: Publication
+    folder: src/content/publications
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: "{{translationKey}}"
+    create: true
+    summary: "{{title}} ({{year}})"
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        i18n: true
+        hint: Exact title as published.
+      - *a1
+      - name: authors
+        label: Authors
+        widget: list
+        i18n: duplicate
+        summary: "{{name}}"
+        hint: In printed order. Each author is plain text, or pick a member to link the name to their profile.
+        fields:
+          - name: name
+            label: Name as printed
+            widget: string
+            hint: Name exactly as it appears on the paper.
+          - name: personKey
+            label: Member (optional)
+            widget: relation
+            collection: people
+            value_field: translationKey
+            search_fields:
+              - name
+              - translationKey
+            display_fields:
+              - name
+            required: false
+            hint: Leave empty for an external author.
+      - name: venue
+        label: Venue
+        widget: string
+        i18n: duplicate
+        hint: Journal or conference, for example ICICyTA 2025.
+      - name: year
+        label: Year
+        widget: number
+        value_type: int
+        i18n: duplicate
+        hint: Publication year. Newest year is listed first unless Order is set.
+      - name: pages
+        label: Pages
+        widget: string
+        required: false
+        i18n: duplicate
+        hint: Optional, for example 342-347.
+      - name: doi
+        label: DOI
+        widget: string
+        required: false
+        i18n: duplicate
+        hint: Optional. The DOI only, without https://doi.org/. The link opens in a new tab.
+      - *a12
+      - *a13
+      - name: relatedPeople
+        label: Related people
+        widget: relation
+        collection: people
+        value_field: translationKey
+        search_fields:
+          - name
+          - translationKey
+        display_fields:
+          - name
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: Shown in the Related section. Authors linked above are added automatically.
+      - *a8
+      - *a9
+      - *a10
+      - *a11
+  - name: people
+    label: People
+    label_singular: Person
+    folder: src/content/people
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: "{{translationKey}}"
+    create: true
+    summary: "{{name}} ({{role}})"
+    media_folder: /src/assets/people
+    public_folder: /src/assets/people
+    fields:
+      - name: photo
+        label: Photo
+        widget: image
+        required: false
+        i18n: duplicate
+        hint: Optional, only with the person's permission. Upload goes to src/assets/people and is renamed to the entry slug (for example taufiq.webp), converted to webp, resized to 1024 px, and stripped of metadata. Max 1,500,000 bytes. Empty means initials.
+      - name: name
+        label: Name
+        widget: string
+        i18n: duplicate
+        hint: Full name, shown as the page title.
+      - name: role
+        label: Role
+        widget: string
+        i18n: true
+        hint: "Professional role, not a position at OLYPS. For example: Computer Vision Engineer."
+      - *a1
+      - name: bio
+        label: Bio
+        widget: text
+        i18n: true
+        hint: Two or three sentences.
+      - name: affiliations
+        label: Affiliations
+        widget: list
+        required: false
+        i18n: true
+        hint: Institutions, one per row, only from the person's official text. Shown on the profile page only, never on cards.
+      - name: links
+        label: Links
+        widget: list
+        required: false
+        i18n: duplicate
+        summary: "{{label}}"
+        hint: Optional profile links such as LinkedIn or Google Scholar. They open in a new tab.
+        fields:
+          - name: label
+            label: Label
+            widget: string
+            hint: For example LinkedIn.
+          - name: url
+            label: URL
+            widget: string
+            hint: Full URL starting with https://.
+      - name: skills
+        label: Skills
+        widget: list
+        required: false
+        i18n: duplicate
+        hint: Short tags, one per row.
+      - *a12
+      - *a13
+      - *a7
+      - *a8
+      - *a9
+      - *a10
+      - *a11
+  - name: contact
+    label: Contact
+    label_singular: Contact page
+    folder: src/content/contact
+    i18n: true
+    format: yaml-frontmatter
+    extension: md
+    slug: contact
+    create: false
+    delete: false
+    summary: Contact page
+    fields:
+      - name: lead
+        label: Introduction
+        widget: text
+        i18n: true
+        hint: Opening sentence under the page title.
+      - name: links
+        label: Links
+        widget: list
+        i18n: true
+        summary: "{{label}}"
+        hint: Cards on the Contact page and the Connect column of the footer. All open in a new tab.
+        fields:
+          - name: label
+            label: Label
+            widget: string
+            hint: Card heading, for example GitHub.
+          - name: url
+            label: URL
+            widget: string
+            hint: Full URL starting with https://.
+          - name: kind
+            label: Kind
+            widget: select
+            options:
+              - github
+              - linkedin
+              - other
+            default: other
+            hint: Chooses the button text.
+      - name: email
+        label: Email
+        widget: string
+        required: false
+        i18n: duplicate
+        hint: "Optional. Leave empty: the site shows no email unless one is entered here."
+      - name: translationKey
+        label: Translation key
+        widget: string
+        i18n: duplicate
+        pattern: *a14
+        hint: Keep as "contact" in both languages.
+      - *a11

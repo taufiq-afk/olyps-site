@@ -13,7 +13,7 @@ Situs OLYPS, sebuah ruang independen untuk belajar dan mengeksplorasi AI terapan
 - Panel admin ditunda. Struktur konten harus dibuat siap untuk ditambah panel admin nanti.
 
 ## Struktur konten
-- Daftar unggulan ada di `src/data/featured.ts` (translationKey proyek, berurutan, maksimum 3). Sumber kartu hero (butir pertama) dan bagian "What we work on". Divalidasi saat build.
+- Daftar unggulan ada di `src/data/featured.json` (translationKey proyek, berurutan, maksimum 3). Sumber kartu hero (butir pertama) dan bagian "What we work on". Divalidasi saat build.
 - Relasi antar koleksi (research, projects, publications, people) memakai daftar translationKey di frontmatter (`relatedResearch`, `relatedProjects`, `relatedPublications`, `relatedPeople`), dua arah dan many-to-many. Penulis publikasi menaut ke people lewat `personKey`. Key yang tidak ada, versi bahasa yang hilang, atau daftar unggulan yang salah akan menggagalkan build (`assertContentValid` di `src/i18n/content.ts`). Halaman menampilkan bagian "Related" otomatis.
 - Research dan Project punya halaman detail (`/research/<slug>/` dan `/projects/<slug>/`). Orang yang terkait dengan entri riset tampil sebagai penulis di detailnya. Bagian kosong pada entri (mis. Roadmap atau Impact) tidak ditulis sama sekali, bukan diisi placeholder.
 - Research = pertanyaan atau hipotesis, metode, temuan yang bisa dikutip. Project = tujuan, cakupan, roadmap, dampak. Satu kalimat definisi tampil di halaman indeks masing-masing.
@@ -48,7 +48,7 @@ Situs OLYPS, sebuah ruang independen untuk belajar dan mengeksplorasi AI terapan
 Berikutnya, setelah penilaian: 404, perapian tata letak ponsel, aksesibilitas. Panel admin ditunda.
 
 ## Halaman
-Home (panggung wallpaper lalu lembar, ringkas dan to the point seperti gaya Apple), Research, Projects, Publications, People, Contact (urutan navigasi, menu ponsel, dan footer). Proyek jangka panjang tampil dengan judul placeholder dan status "in progress".
+Home (panggung wallpaper lalu lembar, ringkas dan to the point seperti gaya Apple), Projects, Research, Publications, People, Contact (urutan navigasi, menu ponsel, dan footer). Urutan navigasi: Projects, Research, Publications, People, Contact. Proyek jangka panjang tampil dengan judul placeholder dan status "in progress".
 
 ## Aturan keamanan dan aset
 - Detail aturan sensitif ada di CLAUDE.local.md (tidak di-commit). Prinsipnya: jangan commit .env, API key, data mentah atau dataset, video asli berukuran besar, materi program pihak ketiga, atau foto orang tanpa izin.
@@ -59,7 +59,7 @@ Home (panggung wallpaper lalu lembar, ringkas dan to the point seperti gaya Appl
 ## Aturan konten
 - Jangan menulis klaim tentang proyek klinis, mitra, hasil, atau angka performa. Jangan menulis klaim status institusi.
 - Proyek jangka panjang memakai judul placeholder "Project title to be decided" / "Judul proyek akan ditentukan", dan entri risetnya juga berjudul placeholder. Deskripsi bidang dan proyek tetap placeholder bertanda (dan tidak tayang di produksi) sampai pemilik situs memberi teksnya.
-- Jangan tampilkan email apa pun di situs. Satu-satunya jalur kontak adalah tautan ke https://github.com/taufiq-afk (`contact.github` di site.config.ts).
+- Jangan tampilkan email apa pun di situs kecuali pemilik situs mengisinya. Data kontak (lead, tautan, email opsional) ada di koleksi `contact` (`src/content/contact/<lang>/contact.md`), dipakai halaman Kontak dan footer. Saat ini hanya tautan ke https://github.com/taufiq-afk.
 - Institusi hanya boleh muncul di field `affiliations` pada profil individu (people), dirender hanya di halaman profil (bukan di kartu), dan hanya dari teks resmi pemilik situs. Field opsional `links` dan `photo` pada people kosong sampai pemilik situs mengisinya, dan foto hanya dengan izin orangnya.
 - Data people dan publications berasal dari teks yang diberikan pemilik situs (placeholder: false). Judul dan urutan penulis publikasi harus dicek manual terhadap halaman IEEE Xplore sebelum rilis (ada komentar TODO lokal di frontmatter, tidak tampil di situs).
 - Pada build produksi semua entri `placeholder: true` disaring dari seluruh situs di `getLocalized` (indeks Research dan Projects, relasi, hitungan, kartu Home, kolom Research di footer), dan halaman detailnya tidak dibangun. Indeks yang kosong menampilkan keadaan kosong yang sudah diterjemahkan. Di dev entri placeholder tetap tampil dengan badge. Tidak ada sitemap yang dibuat otomatis. Avatar tanpa foto menampilkan inisial dengan aria-label hanya nama orangnya. Tidak ada aset placeholder bergambar di `public/` selain logo sementara.

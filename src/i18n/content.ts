@@ -65,6 +65,23 @@ export function assertContentValid(): Promise<void> {
       }
     }
 
+    // leadsTo menunjuk entri project, research, atau publication: key harus ada dan tidak ambigu antar koleksi.
+    const leadsKinds: Kind[] = ['projects', 'research', 'publications'];
+    const leadsKeys = new Set<string>();
+    for (const kind of leadsKinds) {
+      for (const key of keysOf(kind)) {
+        if (leadsKeys.has(key)) errors.push(`translationKey "${key}" dipakai di lebih dari satu koleksi (project, research, publication), leadsTo menjadi ambigu`);
+        leadsKeys.add(key);
+      }
+    }
+    for (const kind of ['projects', 'research'] as Kind[]) {
+      for (const entry of all[kind]) {
+        for (const key of (entry.data.leadsTo ?? []) as string[]) {
+          if (!leadsKeys.has(key)) errors.push(`${kind}/${entry.id}: leadsTo merujuk "${key}" yang tidak ada di project, research, atau publication`);
+        }
+      }
+    }
+
     if (featured.length > FEATURED_MAX) errors.push(`featured: ${featured.length} butir, maksimum ${FEATURED_MAX}`);
     if (new Set(featured).size !== featured.length) errors.push('featured: ada key ganda');
     for (const key of featured) {
@@ -74,6 +91,28 @@ export function assertContentValid(): Promise<void> {
     if (errors.length) throw new Error(`Konten tidak valid:\n- ${errors.join('\n- ')}`);
   })();
   return validation;
+}
+
+/**
+ * Urutan tampil: order naik (kosong terakhir), lalu startDate terbaru (publikasi: tahun terbaru), lalu judul atau nama.
+ * Untuk publikasi order menimpa urutan tahun.
+ */
+export function compareEntries(a: { data: Record<string, any> }, b: { data: Record<string, any> }): number {
+  const oa = a.data.order as number | undefined;
+  const ob = b.data.order as number | undefined;
+  if (oa !== ob) {
+    if (oa === undefined) return 1;
+    if (ob === undefined) return -1;
+    return oa - ob;
+  }
+  const ka = a.data.year !== undefined ? String(a.data.year) : (a.data.startDate as string | undefined);
+  const kb = b.data.year !== undefined ? String(b.data.year) : (b.data.startDate as string | undefined);
+  if (ka !== kb) {
+    if (ka === undefined) return 1;
+    if (kb === undefined) return -1;
+    return kb.localeCompare(ka);
+  }
+  return String(a.data.title ?? a.data.name ?? '').localeCompare(String(b.data.title ?? b.data.name ?? ''));
 }
 
 /** Entri contoh berlabel placeholder tidak ikut tayang pada build produksi. Di dev tetap tampil. */
@@ -87,12 +126,7 @@ const isPublished = (data: { draft: boolean; placeholder: boolean }) => !data.dr
 export async function getLocalized<K extends Kind>(kind: K, lang: Lang) {
   await assertContentValid();
   const entries = await getCollection(kind, (entry) => entry.data.lang === lang && isPublished(entry.data));
-  return entries.sort((a, b) => {
-    const da = a.data as { order: number; year?: number };
-    const db = b.data as { order: number; year?: number };
-    if (kind === 'publications' && da.year !== db.year) return (db.year ?? 0) - (da.year ?? 0);
-    return da.order - db.order;
-  });
+  return entries.sort(compareEntries);
 }
 
 /** Proyek unggulan sesuai urutan di src/data/featured.json. */
@@ -132,11 +166,42 @@ export async function getRelated(kind: Kind, key: string, lang: Lang): Promise<R
   }
   const items: RelatedItem[] = [];
   for (const k of KINDS) {
-    const localized = all[k].filter((e) => e.data.lang === lang && isPublished(e.data as { draft: boolean; placeholder: boolean })).sort((a, b) => a.data.order - b.data.order);
+    const localized = all[k].filter((e) => e.data.lang === lang && isPublished(e.data as { draft: boolean; placeholder: boolean })).sort(compareEntries);
     for (const entry of localized) {
       if (!linked.has(`${k}:${entry.data.translationKey}`)) continue;
       items.push({ kind: k, key: entry.data.translationKey, title: entry.data.title ?? entry.data.name, href: hrefFor(k, entrySlug(entry.id), lang) });
     }
   }
   return items;
+}
+
+export interface LeadsToItem { kind: Kind; title: string; href: string }
+
+/** Tujuan kelanjutan (leadsTo) yang tayang, dalam bahasa yang diminta. Entri placeholder pada produksi dilewati. */
+export async function getLeadsTo(keys: string[], lang: Lang): Promise<LeadsToItem[]> {
+  await assertContentValid();
+  const all = (await loadAll()) as unknown as Record<Kind, Any[]>;
+  const items: LeadsToItem[] = [];
+  for (const key of keys) {
+    for (const kind of ['projects', 'research', 'publications'] as Kind[]) {
+      const entry = all[kind].find((e) => e.data.translationKey === key && e.data.lang === lang && isPublished(e.data as { draft: boolean; placeholder: boolean }));
+      if (entry) items.push({ kind, title: entry.data.title, href: hrefFor(kind, entrySlug(entry.id), lang) });
+    }
+  }
+  return items;
+}
+
+/** Data kontak satu bahasa, sumber tunggal halaman Kontak dan footer. */
+export async function getContact(lang: Lang) {
+  const entry = (await getCollection('contact')).find((e) => e.data.lang === lang);
+  if (!entry) throw new Error(`Konten tidak valid:\n- contact: versi ${lang} tidak ada`);
+  return entry.data;
+}
+
+const MONTH_LOCALE: Record<Lang, string> = { en: 'en-US', id: 'id-ID' };
+
+/** "2026-11" menjadi "Nov 2026" (EN) atau "Nov 2026" (ID) sesuai bahasa. */
+export function formatMonth(value: string, lang: Lang): string {
+  const [y, m] = value.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(MONTH_LOCALE[lang], { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }

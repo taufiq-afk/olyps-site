@@ -1,4 +1,5 @@
 ---
+import StatusLine from '../../../components/StatusLine.astro';
 import { ArrowUpRight, FlaskConical } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
@@ -31,7 +32,7 @@ const items = await Promise.all(entries.map(async (entry) => ({
         <article class="card card--md research-card" id={entrySlug(entry.id)}>
           <span class="icon-tile"><FlaskConical size={26} aria-hidden="true" /></span>
           <h2><a class="research-card__link" href={`${base}/${lang}/research/${entrySlug(entry.id)}/`}>{entry.data.title}</a></h2>
-          {entry.data.status && <span class="badge badge--accent">{t(`research.status.${entry.data.status}` as UiKey)}</span>}
+          <StatusLine lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} />
           <p>{entry.data.summary}</p>
           {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
           <Related lang={lang} items={related} compact />

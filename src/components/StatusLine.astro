@@ -1,0 +1,16 @@
+---
+// Satu baris ringkas untuk kartu: "Sejak Nov 2026, Berjalan". Bagian yang kosong tidak dirender.
+import type { Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+import type { UiKey } from '../i18n/ui';
+import { formatMonth } from '../i18n/content';
+
+interface Props { lang: Lang; status: string; startDate?: string; endDate?: string }
+const { lang, status, startDate, endDate } = Astro.props;
+const t = useTranslations(lang);
+const parts = [
+  startDate && `${t('timeline.since')} ${formatMonth(startDate, lang)}`,
+  `${t(`status.${status}` as UiKey)}${endDate ? ` ${formatMonth(endDate, lang)}` : ''}`,
+].filter(Boolean);
+---
+<span class="badge badge--accent status-line">{parts.join(', ')}</span>

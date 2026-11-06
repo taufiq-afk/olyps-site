@@ -1,0 +1,45 @@
+---
+// Blok Timeline di halaman detail: mulai, status, selesai, dan "Berlanjut ke". Baris yang kosong tidak dirender.
+import { ExternalLink } from '@lucide/astro';
+import type { Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+import type { UiKey } from '../i18n/ui';
+import { formatMonth, getLeadsTo } from '../i18n/content';
+
+interface Props { lang: Lang; status: string; startDate?: string; endDate?: string; leadsTo?: string[]; leadsToUrl?: string }
+const { lang, status, startDate, endDate, leadsTo = [], leadsToUrl } = Astro.props;
+const t = useTranslations(lang);
+const targets = await getLeadsTo(leadsTo, lang);
+---
+<section class="timeline" aria-labelledby="timeline-title">
+  <h2 id="timeline-title" class="timeline__title">{t('timeline.title')}</h2>
+  <dl class="timeline__list">
+    {startDate && <div><dt>{t('timeline.started')}</dt><dd>{formatMonth(startDate, lang)}</dd></div>}
+    <div><dt>{t('timeline.status')}</dt><dd>{t(`status.${status}` as UiKey)}</dd></div>
+    {endDate && <div><dt>{t('timeline.ended')}</dt><dd>{formatMonth(endDate, lang)}</dd></div>}
+    {(targets.length > 0 || leadsToUrl) && (
+      <div>
+        <dt>{t('timeline.leadsTo')}</dt>
+        <dd>
+          <ul class="timeline__links">
+            {targets.map((item) => <li><a href={item.href}>{item.title}</a></li>)}
+            {leadsToUrl && (
+              <li><a href={leadsToUrl} target="_blank" rel="noopener noreferrer">{leadsToUrl.replace(/^https?:\/\//, '')}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
+            )}
+          </ul>
+        </dd>
+      </div>
+    )}
+  </dl>
+</section>
+
+<style is:global>
+  .timeline { margin-top: var(--space-5); max-width: var(--measure); }
+  .timeline__title { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }
+  .timeline__list { display: grid; gap: var(--space-2); margin: 0; }
+  .timeline__list > div { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: var(--space-3); }
+  .timeline__list dt { color: var(--text-muted); }
+  .timeline__list dd { margin: 0; }
+  .timeline__links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+  .timeline__links a { color: var(--accent); display: inline-flex; align-items: center; gap: var(--space-1); }
+</style>

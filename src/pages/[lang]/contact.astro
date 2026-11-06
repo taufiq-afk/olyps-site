@@ -1,8 +1,10 @@
 ---
-import { ExternalLink } from '@lucide/astro';
+import { ExternalLink, Mail } from '@lucide/astro';
 import PageShell from '../../components/PageShell.astro';
+import { getContact } from '../../i18n/content';
 import { useTranslations } from '../../i18n/utils';
-import { siteConfig, siteLangs, type Lang } from '../../site.config';
+import type { UiKey } from '../../i18n/ui';
+import { siteLangs, type Lang } from '../../site.config';
 
 export function getStaticPaths() {
   return siteLangs.map((lang) => ({ params: { lang } }));
@@ -10,12 +12,28 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
+// Sumber tunggal: src/content/contact/<lang>/contact.md (dipakai juga oleh footer).
+const contact = await getContact(lang);
 ---
-<PageShell lang={lang} current="contact" title={t('nav.contact')} lead={t('page.contact.lead')} banner="50% 92%" split>
-  <!-- Satu-satunya jalur kontak adalah profil GitHub. Tidak ada email di situs. -->
-  <a class="card card--md card--link" data-glow href={siteConfig.contact.github} target="_blank" rel="noopener noreferrer">
-    <h2>{t('contact.github')}</h2>
-    <p>{siteConfig.contact.github.replace('https://', '')}</p>
-    <span class="btn btn--primary">{t('contact.github.cta')}<ExternalLink size={18} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></span>
-  </a>
+<PageShell lang={lang} current="contact" title={t('nav.contact')} lead={contact.lead} banner="50% 92%" split>
+  <div class="contact-list">
+    {contact.links.map((link) => (
+      <a class="card card--md card--link" data-glow href={link.url} target="_blank" rel="noopener noreferrer">
+        <h2>{link.label}</h2>
+        <p>{link.url.replace(/^https?:\/\//, '')}</p>
+        <span class="btn btn--primary">{t(`contact.cta.${link.kind}` as UiKey)}<ExternalLink size={18} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></span>
+      </a>
+    ))}
+    {contact.email && (
+      <a class="card card--md card--link" data-glow href={`mailto:${contact.email}`}>
+        <h2>Email</h2>
+        <p>{contact.email}</p>
+        <span class="btn btn--primary">{contact.email}<Mail size={18} aria-hidden="true" /></span>
+      </a>
+    )}
+  </div>
 </PageShell>
+
+<style>
+  .contact-list { display: grid; gap: var(--space-4); }
+</style>

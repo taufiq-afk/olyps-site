@@ -5,14 +5,17 @@ import { useTranslations } from '../i18n/utils';
 import type { UiKey } from '../i18n/ui';
 import ThemeToggle from './ThemeToggle.astro';
 import LangSwitch from './LangSwitch.astro';
-import { entrySlug, getLocalized, hrefFor } from '../i18n/content';
+import { entrySlug, getContact, getLocalized, hrefFor } from '../i18n/content';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const to = (path: string) => `${base}/${lang}/${path}`;
-const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
+// Projects dan Research: maksimum 3 entri menurut urutan tampil.
+const projectEntries = (await getLocalized('projects', lang)).slice(0, 3);
+const researchEntries = (await getLocalized('research', lang)).slice(0, 3);
+const contact = await getContact(lang);
 ---
 <footer class="footer">
   <div class="container">
@@ -34,6 +37,15 @@ const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
         </ul>
       </nav>
 
+      {projectEntries.length > 0 && (
+      <nav class="footer__col" aria-labelledby="footer-projects">
+        <h2 id="footer-projects" class="footer__title">{t('footer.projects')}</h2>
+        <ul>
+          {projectEntries.map((e) => <li><a href={hrefFor('projects', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
+        </ul>
+      </nav>
+      )}
+
       {researchEntries.length > 0 && (
       <nav class="footer__col" aria-labelledby="footer-research">
         <h2 id="footer-research" class="footer__title">{t('footer.research')}</h2>
@@ -46,7 +58,10 @@ const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
       <div class="footer__col">
         <h2 class="footer__title">{t('footer.connect')}</h2>
         <ul>
-          <li><a href={siteConfig.contact.github} target="_blank" rel="noopener noreferrer">{t('contact.github')}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
+          {contact.links.map((link) => (
+            <li><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
+          ))}
+          {contact.email && <li><a href={`mailto:${contact.email}`}>{contact.email}</a></li>}
         </ul>
       </div>
     </div>
@@ -66,7 +81,7 @@ const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
 
 <style>
   .footer { padding-block: var(--space-8) var(--space-6); border-top: 1px solid var(--border); font-size: var(--text-small); color: var(--text-muted); }
-  .footer__grid { display: grid; gap: var(--space-6); grid-template-columns: 1.6fr 1fr 1fr 1.3fr; }
+  .footer__grid { display: grid; gap: var(--space-6); grid-template-columns: 1.6fr 1fr 1fr 1fr 1.3fr; }
   .footer__brand p { margin-top: var(--space-3); max-width: 28rem; }
   .footer__logo { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text); text-decoration: none; min-height: var(--tap); }
   .footer__title { font-size: var(--text-small); font-weight: 600; color: var(--text); letter-spacing: 0; margin-bottom: var(--space-3); }

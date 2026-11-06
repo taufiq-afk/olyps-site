@@ -137,12 +137,7 @@ export const siteConfig = {
   },
 
   // Urutan navigasi, dipakai navbar, menu ponsel, dan footer.
-  nav: ['research', 'projects', 'publications', 'people', 'contact'] as ('research' | 'projects' | 'publications' | 'people' | 'contact')[],
-
-  // Tidak ada email di situs. Satu-satunya jalur kontak adalah profil GitHub.
-  contact: {
-    github: 'https://github.com/taufiq-afk',
-  },
+  nav: ['projects', 'research', 'publications', 'people', 'contact'] as ('research' | 'projects' | 'publications' | 'people' | 'contact')[],
 
   disclaimers: {
     placeholder: {

@@ -1,6 +1,6 @@
 // Merapikan unggahan gambar di src/assets/<jenis>/ yang dirujuk entri konten.
 // - Nama berkas menjadi slug entri (mis. taufiq.webp), bukan nama berkas asli. Rujukan di Markdown ikut diperbarui.
-// - Gambar diputar sesuai EXIF, dikonversi ke webp, dibatasi 1024 px dan ukuran maksimum pemeriksa, tanpa metadata (EXIF, GPS, XMP).
+// - Gambar diputar sesuai EXIF, dikonversi ke webp, dibatasi 1024 px (people) atau 1920 px (research, projects) dan ukuran maksimum pemeriksa, tanpa metadata (EXIF, GPS, XMP).
 // - Idempoten: berkas yang sudah memenuhi syarat hanya diganti nama bila perlu, tidak dikompres ulang.
 // Dipanggil otomatis oleh integrations/dev-admin.mjs saat berkas konten atau aset berubah, atau manual: npm run tidy:assets
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -10,13 +10,15 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 export const KINDS = ['people', 'research', 'projects'];
-const MAX_DIM = 1024;
+// Sisi terpanjang maksimum per jenis: foto orang kecil, gambar proyek dan riset lebih besar (tampil di kolom media).
+const MAX_DIM_BY_KIND = { people: 1024, research: 1920, projects: 1920 };
 
 export async function tidyAssets({ root = process.cwd(), log = console.log } = {}) {
   const maxBytes = JSON.parse(readFileSync(path.join(root, 'scripts/predeploy.config.json'), 'utf8')).maxFileBytes;
   const changes = [];
 
   for (const kind of KINDS) {
+    const MAX_DIM = MAX_DIM_BY_KIND[kind];
     const contentDir = path.join(root, 'src/content', kind);
     if (!existsSync(contentDir)) continue;
     const refRe = new RegExp(`/src/assets/${kind}/[^\\s"'#)]+`, 'g');
