@@ -1,5 +1,5 @@
 ---
-import { ArrowUp } from '@lucide/astro';
+import { ArrowUp, ExternalLink } from '@lucide/astro';
 import { siteConfig, type Lang } from '../site.config';
 import { useTranslations } from '../i18n/utils';
 import type { UiKey } from '../i18n/ui';
@@ -46,7 +46,7 @@ const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
       <div class="footer__col">
         <h2 class="footer__title">{t('footer.connect')}</h2>
         <ul>
-          <li><a href={siteConfig.contact.github} rel="noopener">{t('contact.github')}</a></li>
+          <li><a href={siteConfig.contact.github} target="_blank" rel="noopener noreferrer">{t('contact.github')}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
         </ul>
       </div>
     </div>
@@ -72,6 +72,7 @@ const researchEntries = (await getLocalized('research', lang)).slice(0, 5);
   .footer__title { font-size: var(--text-small); font-weight: 600; color: var(--text); letter-spacing: 0; margin-bottom: var(--space-3); }
   .footer__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
   .footer__col a { color: var(--text-muted); text-decoration: none; }
+  .footer__col a svg { margin-inline-start: 0.3em; vertical-align: -0.15em; }
   .footer__col a:hover { color: var(--text); text-decoration: underline; }
   .footer__muted { color: var(--text-muted); }
   .footer__note { margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--border); max-width: 60rem; }

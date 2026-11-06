@@ -3,6 +3,7 @@
 // sehingga berkas admin tidak pernah masuk dist. Alamat mengikuti base situs (mis. /olyps-site/admin/).
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { tidyAssets } from '../scripts/tidy-assets.mjs';
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.yml': 'text/yaml; charset=utf-8' };
 
@@ -33,6 +34,20 @@ export default function devAdmin() {
             next();
           }
         });
+        // Rapikan unggahan (nama dari slug, webp, tanpa metadata) setelah admin menyimpan konten atau gambar.
+        const relevant = /[\\/]src[\\/](content[\\/](people|research|projects)[\\/].+\.md|assets[\\/](people|research|projects)[\\/][^.].*)$/;
+        let timer;
+        let running = false;
+        const schedule = (file) => {
+          if (!relevant.test(file) || file.endsWith('.tmp')) return;
+          clearTimeout(timer);
+          timer = setTimeout(async () => {
+            if (running) return;
+            running = true;
+            try { await tidyAssets({ log: (m) => logger.info(m) }); } catch (e) { logger.warn(`tidy gagal: ${e.message}`); } finally { running = false; }
+          }, 1500);
+        };
+        server.watcher.on('add', schedule).on('change', schedule);
         logger.info(`Admin (hanya dev): ${prefix}/`);
       },
     },

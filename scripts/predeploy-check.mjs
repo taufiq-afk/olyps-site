@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import sharp from 'sharp';
 import { siteConfig } from '../src/site.config.ts';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -224,6 +225,52 @@ section('admin tidak ikut produksi');
     if (/sveltia|unpkg\.com\/@sveltia|netlify-cms|decap-cms/i.test(text)) findings.push(`${file}: rujukan ke CDN atau skrip admin`);
   }
   report('dist tidak berisi folder admin atau rujukan ke CDN admin', findings);
+}
+
+// ---------- 11. metadata gambar (EXIF, XMP, IPTC, GPS)
+const imageExt = /\.(jpe?g|png|webp|avif|tiff?|heic)$/i;
+const assetDirs = ['src/assets', 'public'].map((d) => path.join(root, d)).filter((d) => existsSync(d));
+const imageFiles = [...distFiles, ...assetDirs.flatMap(walk)].filter((f) => imageExt.test(f));
+// Cari tag GPSInfo (0x8825) di IFD0 pada blok EXIF.
+const hasGps = (exif) => {
+  try {
+    const t = exif.subarray(exif.indexOf('Exif\0\0') === 0 ? 6 : 0);
+    const le = t.toString('ascii', 0, 2) === 'II';
+    const u16 = (o) => (le ? t.readUInt16LE(o) : t.readUInt16BE(o));
+    const u32 = (o) => (le ? t.readUInt32LE(o) : t.readUInt32BE(o));
+    const ifd = u32(4);
+    for (let i = 0, n = u16(ifd); i < n; i++) if (u16(ifd + 2 + i * 12) === 0x8825) return true;
+  } catch { /* blok tidak terbaca: anggap tanpa GPS, metadata tetap dilaporkan */ }
+  return false;
+};
+section('metadata gambar');
+{
+  const findings = [];
+  for (const f of imageFiles) {
+    const m = await sharp(f).metadata().catch(() => null);
+    if (!m) continue;
+    const kinds = [m.exif && (hasGps(m.exif) ? 'EXIF dengan GPS' : 'EXIF'), m.xmp && 'XMP', m.iptc && 'IPTC'].filter(Boolean);
+    if (kinds.length) findings.push(`${rel(f)}: ${kinds.join(', ')}`);
+  }
+  report(`${imageFiles.length} gambar (dist, src/assets, public) tanpa EXIF, XMP, IPTC, atau GPS`, findings, 12);
+}
+
+// ---------- 12. nama berkas aset
+section('nama berkas aset');
+{
+  // Pola nama bawaan perangkat atau aplikasi, serta tanggal dan jam di nama.
+  const deviceNames = [
+    /whatsapp|telegram|signal-\d|^wa\d{4}/i,
+    /^(img|dsc[nf]?|pxl|mvimg|vid|dcim)[-_ ]?\d/i,
+    /^(screenshot|screen ?shot|cleanshot|simulator screen)/i,
+    /\d{4}[-_.]?\d{2}[-_.]?\d{2}[-_. ]*(at |t)?\d{2}[.:_-]?\d{2}([.:_-]?\d{2})?/i,
+    /\bat \d{1,2}[.:]\d{2}/i,
+    /\(\d+\)\.\w+$/,
+  ];
+  const mediaExt = /\.(jpe?g|png|webp|avif|gif|svg|tiff?|heic|mp4|webm|mov|m4v|vtt)$/i;
+  const names = [...distFiles, ...assetDirs.flatMap(walk)].filter((f) => mediaExt.test(f));
+  const findings = names.filter((f) => deviceNames.some((re) => re.test(path.basename(f)))).map(rel);
+  report(`${names.length} berkas aset publik tanpa pola nama bawaan perangkat atau aplikasi`, findings, 12);
 }
 
 console.log(failures ? `\nHASIL: GAGAL (${failures} pemeriksaan tidak lolos). Jangan deploy.` : '\nHASIL: LOLOS. Aman untuk deploy.');

@@ -14,6 +14,9 @@ i18n:
 
 # Unggahan foto masuk src/assets/people (diproses Astro, bukan public/).
 # Batas: 1.500.000 byte per berkas (sama dengan maxFileBytes di scripts/predeploy.config.json).
+# Tiap jenis konten punya folder sendiri (people, research, projects), diatur per koleksi di bawah.
+# Setelah menyimpan, integrations/dev-admin.mjs merapikan unggahan: nama dari slug entri (mis. taufiq.webp),
+# webp, maksimum 1024 px dan 1.500.000 byte, tanpa EXIF atau GPS (scripts/tidy-assets.mjs, atau `npm run tidy:assets`).
 media_folder: /src/assets/people
 public_folder: /src/assets/people
 media_libraries:
@@ -55,54 +58,133 @@ collections:
       - { name: skills, label: Skills, widget: list, required: false, i18n: duplicate }
       - { name: affiliations, label: Affiliations, widget: list, required: false, i18n: true }
       - name: links
-        label: Links
+        label: Links (open in a new tab)
         widget: list
         required: false
         i18n: duplicate
         fields:
           - { name: label, label: Label, widget: string }
           - { name: url, label: URL, widget: string }
-      # Foto hanya dengan izin orangnya. Path relatif ke berkas ini, menuju src/assets/people.
+      # Foto hanya dengan izin orangnya. Path ke src/assets/people (nama dirapikan otomatis menjadi <slug>.webp).
       - { name: photo, label: Photo (only with permission), widget: image, required: false, i18n: duplicate }
-      # Relasi: daftar translationKey, divalidasi saat build (src/i18n/content.ts).
       - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
       - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
       - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
 
-  # Tiga koleksi di bawah hanya sumber pilihan relasi: tersembunyi, tidak bisa dibuat atau dihapus lewat admin.
   - name: research
-    label: Research (relation source)
+    label: Research
+    label_singular: Research entry
     folder: src/content/research
-    hide: true
-    create: false
-    delete: false
     i18n: true
     format: yaml-frontmatter
     extension: md
+    slug: '{{translationKey}}'
+    create: true
+    summary: '{{title}}'
+    media_folder: /src/assets/research
+    public_folder: /src/assets/research
     fields:
-      - { name: translationKey, widget: string, i18n: duplicate }
-      - { name: title, widget: string, i18n: true }
+      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
+      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
+      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
+      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
+      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
+      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
+      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
+      - { name: title, label: Title, widget: string, i18n: true }
+      - { name: summary, label: Summary, widget: text, i18n: true }
+      - { name: area, label: Area, widget: select, options: [health, environment], required: false, i18n: duplicate }
+      - { name: status, label: Status, widget: select, options: [exploratory, ongoing, completed], required: false, i18n: duplicate }
+      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
+      # Badan Markdown. Bagian yang dipakai: Question or hypothesis, Methods, Findings. Bagian yang tidak ditulis tidak dirender.
+      - { name: body, label: Body, widget: markdown, required: false, i18n: true }
+
   - name: projects
-    label: Projects (relation source)
+    label: Projects
+    label_singular: Project
     folder: src/content/projects
-    hide: true
-    create: false
-    delete: false
     i18n: true
     format: yaml-frontmatter
     extension: md
+    slug: '{{translationKey}}'
+    create: true
+    summary: '{{title}}'
+    media_folder: /src/assets/projects
+    public_folder: /src/assets/projects
     fields:
-      - { name: translationKey, widget: string, i18n: duplicate }
-      - { name: title, widget: string, i18n: true }
+      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
+      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
+      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
+      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
+      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
+      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
+      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
+      - { name: title, label: Title, widget: string, i18n: true }
+      - { name: summary, label: Summary, widget: text, i18n: true }
+      - { name: status, label: Status, widget: select, options: [in-progress, planned, concept], i18n: duplicate }
+      - { name: caption, label: Caption, widget: string, required: false, i18n: true }
+      # Media di folder public/media (bukan unggahan admin): isi path tanpa garis miring awal, mis. media/olyps-hero-poster.webp.
+      - { name: mediaPoster, label: Media poster (path in public/), widget: string, required: false, i18n: duplicate }
+      - { name: mediaVideo, label: Media video (base name, no extension), widget: string, required: false, i18n: duplicate }
+      - { name: mediaCaptions, label: Media captions (VTT for this language), widget: string, required: false, i18n: true }
+      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPublications, label: Related publications, widget: relation, collection: publications, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
+      # Badan Markdown. Bagian yang dipakai: Goal, Scope, Roadmap, Impact. Roadmap dan Impact opsional. Bagian yang tidak ditulis tidak dirender.
+      - { name: body, label: Body, widget: markdown, required: false, i18n: true }
+
   - name: publications
-    label: Publications (relation source)
+    label: Publications
+    label_singular: Publication
     folder: src/content/publications
-    hide: true
-    create: false
-    delete: false
     i18n: true
     format: yaml-frontmatter
     extension: md
+    slug: '{{translationKey}}'
+    create: true
+    summary: '{{title}} ({{year}})'
     fields:
-      - { name: translationKey, widget: string, i18n: duplicate }
-      - { name: title, widget: string, i18n: true }
+      # Per bahasa: nilai bahasa diisi otomatis dari folder (en atau id).
+      - { name: lang, label: Language, widget: hidden, default: '{{locale}}', i18n: true }
+      # Kunci penghubung en dan id, juga kunci relasi. Harus identik di kedua bahasa.
+      - { name: translationKey, label: Translation key, widget: string, i18n: duplicate, pattern: ['^[a-z0-9-]+$', 'Lowercase letters, digits, and hyphens only'] }
+      - { name: placeholder, label: Placeholder (hidden on production if true), widget: boolean, default: true, i18n: duplicate }
+      - { name: draft, label: Draft, widget: boolean, default: false, i18n: duplicate }
+      - { name: order, label: Order, widget: number, value_type: int, default: 0, i18n: duplicate }
+      - { name: title, label: Title, widget: string, i18n: true }
+      # Penulis: teks biasa, atau pilih anggota (personKey) agar nama menaut ke profil.
+      - name: authors
+        label: Authors
+        widget: list
+        i18n: duplicate
+        summary: '{{name}}'
+        fields:
+          - { name: name, label: Name as printed, widget: string }
+          - { name: personKey, label: Member (optional, links to profile), widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], required: false }
+      - { name: venue, label: Venue, widget: string, i18n: duplicate }
+      - { name: year, label: Year, widget: number, value_type: int, i18n: duplicate }
+      - { name: pages, label: Pages, widget: string, required: false, i18n: duplicate }
+      - { name: doi, label: DOI (without URL), widget: string, required: false, i18n: duplicate }
+      - { name: relatedResearch, label: Related research, widget: relation, collection: research, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedProjects, label: Related projects, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title], multiple: true, required: false, i18n: duplicate }
+      - { name: relatedPeople, label: Related people, widget: relation, collection: people, value_field: translationKey, search_fields: [name, translationKey], display_fields: [name], multiple: true, required: false, i18n: duplicate }
+
+  # Daftar unggulan (src/data/featured.json): larik translationKey proyek, berurutan. Butir pertama menjadi kartu hero.
+  # Formulir menolak lebih dari 3 butir (max) dan hanya menawarkan proyek yang ada. Key ganda ditolak oleh build.
+  - name: settings
+    label: Settings
+    files:
+      - name: featured
+        label: Featured projects
+        file: src/data/featured.json
+        format: json
+        fields:
+          - name: featured
+            label: Featured projects (max 3, ordered)
+            widget: list
+            root: true
+            min: 0
+            max: 3
+            field: { name: key, label: Project, widget: relation, collection: projects, value_field: translationKey, search_fields: [title, translationKey], display_fields: [title] }

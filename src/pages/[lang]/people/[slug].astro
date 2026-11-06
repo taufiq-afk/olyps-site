@@ -42,7 +42,7 @@ const related = await getRelated('people', entry.data.translationKey, lang);
           <h2>{t('people.links')}</h2>
           <ul class="profile__links">
             {entry.data.links.map((link) => (
-              <li><a href={link.url} rel="noopener">{link.label}<ExternalLink size={14} aria-hidden="true" /></a></li>
+              <li><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
             ))}
           </ul>
         </section>

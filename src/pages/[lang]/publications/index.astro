@@ -50,8 +50,8 @@ const rows = await Promise.all(entries.map(async (entry) => ({
             <span>{entry.data.year}</span>
             {entry.data.pages && <span>{t('pub.pages')} {entry.data.pages}</span>}
             {entry.data.doi && (
-              <a class="pub__doi" href={`https://doi.org/${entry.data.doi}`} rel="noopener">
-                {t('pub.doi')} {entry.data.doi}<ExternalLink size={14} aria-hidden="true" />
+              <a class="pub__doi" href={`https://doi.org/${entry.data.doi}`} target="_blank" rel="noopener noreferrer">
+                {t('pub.doi')} {entry.data.doi}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span>
               </a>
             )}
             {entry.data.placeholder && <PlaceholderBadge lang={lang} />}

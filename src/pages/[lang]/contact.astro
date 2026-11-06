@@ -13,9 +13,9 @@ const t = useTranslations(lang);
 ---
 <PageShell lang={lang} current="contact" title={t('nav.contact')} lead={t('page.contact.lead')} banner="50% 92%" split>
   <!-- Satu-satunya jalur kontak adalah profil GitHub. Tidak ada email di situs. -->
-  <a class="card card--md card--link" data-glow href={siteConfig.contact.github} rel="noopener">
+  <a class="card card--md card--link" data-glow href={siteConfig.contact.github} target="_blank" rel="noopener noreferrer">
     <h2>{t('contact.github')}</h2>
     <p>{siteConfig.contact.github.replace('https://', '')}</p>
-    <span class="btn btn--primary">{t('contact.github.cta')}<ExternalLink size={18} aria-hidden="true" /></span>
+    <span class="btn btn--primary">{t('contact.github.cta')}<ExternalLink size={18} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></span>
   </a>
 </PageShell>
