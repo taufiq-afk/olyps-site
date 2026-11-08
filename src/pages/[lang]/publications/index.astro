@@ -24,7 +24,7 @@ const rows = await Promise.all(entries.map(async (entry) => ({
   related: (await getRelated('publications', entry.data.translationKey, lang)).filter((r) => r.kind !== 'people'),
 })));
 ---
-<PageShell lang={lang} current="publications" title={page.title} lead={page.lead} banner="22% 40%">
+<PageShell lang={lang} current="publications" title={page.title} lead={page.lead}>
   {rows.length === 0 ? (
     <div class="card empty">
       <span class="icon-tile"><BookOpen size={26} aria-hidden="true" /></span>

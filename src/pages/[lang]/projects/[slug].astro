@@ -28,7 +28,7 @@ const members = all.filter((r) => r.kind === 'people');
 const related = all.filter((r) => r.kind !== 'people');
 const hasMedia = !!(entry.data.image || entry.data.mediaVideo);
 ---
-<PageShell lang={lang} current="projects" title={entry.data.title} banner="50% 52%">
+<PageShell lang={lang} current="projects" title={entry.data.title}>
   <DetailPage
     lang={lang}
     backHref={`${base}/${lang}/projects/`}

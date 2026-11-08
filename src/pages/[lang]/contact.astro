@@ -15,7 +15,7 @@ const t = useTranslations(lang);
 // Sumber tunggal: src/content/contact/<lang>/contact.md (dipakai juga oleh footer).
 const contact = await getContact(lang);
 ---
-<PageShell lang={lang} current="contact" title={await getNavLabel('contact', lang)} lead={contact.lead} banner="50% 92%" split>
+<PageShell lang={lang} current="contact" title={await getNavLabel('contact', lang)} lead={contact.lead} split>
   <div class="contact-list">
     {contact.links.map((link) => (
       <a class="card card--md card--link" data-glow href={link.url} target="_blank" rel="noopener noreferrer">

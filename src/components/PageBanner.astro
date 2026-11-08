@@ -1,20 +1,44 @@
 ---
+// Banner pixel per halaman dan per tema: public/banners/banner-<halaman>-<tema>.webp (2808x438, WebP lossless, dipasang apa adanya).
+// Dua gambar bergantian lewat [data-theme] di <html> (sama seperti logo), jadi tanpa kilatan dan tanpa layout shift.
+// Dekoratif (alt kosong). Bila gambar halaman tidak ada, jatuh ke potongan poster hero.
+import fs from 'node:fs';
+import path from 'node:path';
 import HeroMedia from './HeroMedia.astro';
 
 interface Props {
-  /** Bagian poster yang ditampilkan, mis. "50% 20%". Berbeda per halaman. */
-  position?: string;
+  /** Kunci halaman: research, projects, publications, people, contact. */
+  page?: string;
 }
-const { position = '50% 50%' } = Astro.props;
+const { page } = Astro.props;
+
+// Posisi horizontal untuk layar sempit (tinggi tetap di tengah).
+const POSITION_X: Record<string, string> = { research: '62%', publications: '46%', projects: '72%', people: '20%', contact: '44%' };
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rel = (theme: string) => `banners/banner-${page}-${theme}.webp`;
+const exists = (theme: string) => !!page && fs.existsSync(path.join(process.cwd(), 'public', rel(theme)));
+const custom = exists('light') && exists('dark');
+const pos = `${(page && POSITION_X[page]) ?? '50%'} 50%`;
 ---
-<!-- Slot banner pixel: poster diam dulu. Hanya satu video autoplay per halaman (pemutar HeroMedia menjaganya). -->
-<div class="page-banner">
-  <HeroMedia video={false} position={position} />
+<div class="page-banner" aria-hidden="true">
+  {custom ? (
+    <>
+      <img class="page-banner__img page-banner__img--light" src={`${base}/${rel('light')}`} alt="" width="2808" height="438" decoding="async" style={`object-position:${pos}`} />
+      <img class="page-banner__img page-banner__img--dark" src={`${base}/${rel('dark')}`} alt="" width="2808" height="438" decoding="async" style={`object-position:${pos}`} />
+    </>
+  ) : (
+    <HeroMedia video={false} position="50% 50%" />
+  )}
 </div>
 
 <style is:global>
   .page-banner {
-    position: relative; height: clamp(8rem, 14vw, 13rem); margin-bottom: var(--space-6);
+    position: relative; aspect-ratio: 2808 / 438; min-height: 8rem; max-height: 14rem; margin-bottom: var(--space-6);
     border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--border); background: var(--sunken);
   }
+  .page-banner__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+  .page-banner__img--dark { display: none; }
+  [data-theme='dark'] .page-banner__img--light { display: none; }
+  [data-theme='dark'] .page-banner__img--dark { display: block; }
 </style>

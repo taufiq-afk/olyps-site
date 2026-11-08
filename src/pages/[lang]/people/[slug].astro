@@ -24,7 +24,7 @@ const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const related = await getRelated('people', entry.data.translationKey, lang);
 ---
-<PageShell lang={lang} current="people" title={entry.data.name} banner="82% 88%">
+<PageShell lang={lang} current="people" title={entry.data.name}>
   <a class="back-link" href={`${base}/${lang}/people/`}><ArrowLeft size={18} aria-hidden="true" />{t('people.back')}</a>
   <article class="profile">
     <Avatar name={entry.data.name} photo={entry.data.photo} large />

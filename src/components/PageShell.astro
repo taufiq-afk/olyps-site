@@ -12,18 +12,16 @@ interface Props {
   current: string;
   title: string;
   lead?: string;
-  /** Posisi poster pada banner pixel. */
-  banner?: string;
   /** Dua kolom: judul di kiri, isi di kanan. */
   split?: boolean;
 }
-const { lang, current, title, lead, banner = '50% 50%', split = false } = Astro.props;
+const { lang, current, title, lead, split = false } = Astro.props;
 ---
 <BaseLayout lang={lang} title={title}>
   <Navbar lang={lang} current={current} />
   <ContentWarnings scope={current} lang={lang} />
   <main id="content" class="container page-top page">
-    <PageBanner position={banner} />
+    <PageBanner page={current} />
     <div class:list={[split && 'page-split']}>
       <header class="page-head">
         <h1>{title}</h1>

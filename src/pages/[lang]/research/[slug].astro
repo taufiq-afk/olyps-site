@@ -26,7 +26,7 @@ const all = await getRelated('research', entry.data.translationKey, lang);
 const authors = all.filter((r) => r.kind === 'people');
 const related = all.filter((r) => r.kind !== 'people');
 ---
-<PageShell lang={lang} current="research" title={entry.data.title} banner="50% 14%">
+<PageShell lang={lang} current="research" title={entry.data.title}>
   <DetailPage
     lang={lang}
     backHref={`${base}/${lang}/research/`}
