@@ -47,6 +47,8 @@ export const siteConfig = {
     black: 'brand/olyps-mark-black.svg',
     alt: 'OLYPS',
   },
+  // Gambar OG 1200x630: potongan poster hero terang (dibuat dengan sharp, tanpa teks).
+  ogImage: 'og/olyps-og.jpg',
   favicon: 'favicon.svg',
   faviconIco: 'favicon.ico',
   appleTouchIcon: 'apple-touch-icon.png',
@@ -89,20 +91,20 @@ export const siteConfig = {
   accent: 'a' as AccentKey,
 
   // Kaca varian tema: persentase warna "raised", sisanya translusen.
-  glass: { light: 76, dark: 74 } satisfies Record<ThemeName, number>,
+  glass: { light: 82, dark: 86 } satisfies Record<ThemeName, number>,
   // Kaca varian on-media mengikuti tema. Terang: kaca terang translusen, teks gelap. Gelap: kaca gelap translusen, teks terang.
   // Selalu garis tepi 1px seragam semi-transparan, tanpa sorotan asimetris.
   glassMedia: {
     light: {
       color: '#FFFDF9',
-      pct: 76,
+      pct: 82,
       border: 'rgb(31 27 23 / 0.14)',
       borderStrong: 'rgb(31 27 23 / 0.26)',
       shadow: '0 2px 4px rgb(30 25 15 / 0.08), 0 14px 32px rgb(30 25 15 / 0.16)',
     },
     dark: {
       color: '#14110F',
-      pct: 62,
+      pct: 80,
       border: 'rgb(255 255 255 / 0.2)',
       borderStrong: 'rgb(255 255 255 / 0.32)',
       shadow: '0 2px 4px rgb(0 0 0 / 0.3), 0 14px 36px rgb(0 0 0 / 0.4)',
@@ -111,22 +113,29 @@ export const siteConfig = {
 
   // Wallpaper hero per tema. Scrim tipis dan warna teks di atasnya mengikuti tema.
   // poster: jpg (webp bernama sama). video: nama dasar tanpa ekstensi (.mp4 dan .webm).
+  // Scrim: scrim = opasitas minimum di layar lebar (teks hanya di kolom kiri), scrimNarrow = di layar sempit (<64rem,
+  // teks menutupi seluruh lebar), scrimLeft = gradasi kiri [di tepi kiri, di 42% lebar] yang memudar sampai 80%.
+  // Sisi kiri video lebih tenang dan kanan lebih ramai, jadi gradasi kiri dibuat ringan. Diuji oleh npm run check:contrast.
   hero: {
     light: {
       scrimColor: '#F7F3EB',
-      scrim: 0.34, // opasitas minimum di seluruh hero, gradasi kiri hanya menambah
+      scrim: 0.3,
+      scrimNarrow: 0.5,
+      scrimLeft: [0.5, 0.26] as [number, number],
       text: '#1F1B17',
       textMuted: '#2E2924',
-      poster: 'media/olyps-hero-poster-light.jpg',
-      video: 'media/olyps-hero-loop-light',
+      poster: 'media/hero-lab-light-poster.jpg',
+      video: 'media/hero-lab-light',
     },
     dark: {
       scrimColor: '#0C0A09',
-      scrim: 0.5,
+      scrim: 0.3,
+      scrimNarrow: 0.66,
+      scrimLeft: [0.55, 0.3] as [number, number],
       text: '#F6F1E7',
       textMuted: '#DDD6CA',
-      poster: 'media/olyps-hero-poster.jpg',
-      video: 'media/olyps-hero-loop',
+      poster: 'media/hero-lab-dark-poster.jpg',
+      video: 'media/hero-lab-dark',
     },
   },
 

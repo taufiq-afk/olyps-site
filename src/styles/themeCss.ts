@@ -13,6 +13,8 @@ const mediaVars = (name: ThemeName) => {
   const gm = siteConfig.glassMedia[name];
   return (
     `--scrim-color:${hero.scrimColor};--scrim-base:color-mix(in srgb, ${hero.scrimColor} ${hero.scrim * 100}%, transparent);` +
+    `--scrim-base-narrow:color-mix(in srgb, ${hero.scrimColor} ${hero.scrimNarrow * 100}%, transparent);` +
+    `--scrim-left-a:${hero.scrimLeft[0] * 100}%;--scrim-left-b:${hero.scrimLeft[1] * 100}%;` +
     `--m-text:${hero.text};--m-text-muted:${hero.textMuted};` +
     `--m-glass-bg:color-mix(in srgb, ${gm.color} ${gm.pct}%, transparent);--m-glass-border:${gm.border};` +
     `--m-border:${gm.border};--m-border-strong:${gm.borderStrong};--m-shadow:${gm.shadow};`

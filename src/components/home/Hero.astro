@@ -66,8 +66,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   @media (min-width: 64rem) { .hero__grid { grid-template-columns: 1.3fr 1fr; gap: var(--space-8); } .hero__grid--single { grid-template-columns: 1fr; } }
 
   .hero__eyebrow { font-size: var(--text-small); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-5); }
-  h1 { font-size: var(--text-hero); max-width: 14ch; }
-  .hero__lead { font-size: var(--text-lead); color: var(--text-muted); max-width: var(--measure); margin-top: var(--space-6); }
+  h1 { font-size: clamp(2.5rem, 1.6rem + 3.2vw, 4.5rem); line-height: 1.05; text-wrap: balance; max-width: 18ch; }
+  .hero__lead { font-size: var(--text-lead); color: var(--text-muted); max-width: 56ch; margin-top: var(--space-6); }
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
 
   .hero__card {

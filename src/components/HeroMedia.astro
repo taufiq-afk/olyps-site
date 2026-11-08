@@ -50,9 +50,11 @@ const config = JSON.stringify({
   .hero-media__scrim {
     position: absolute; inset: 0;
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--scrim-color) 72%, transparent) 0%, color-mix(in srgb, var(--scrim-color) 38%, transparent) 42%, transparent 80%),
+      linear-gradient(90deg, color-mix(in srgb, var(--scrim-color) var(--scrim-left-a), transparent) 0%, color-mix(in srgb, var(--scrim-color) var(--scrim-left-b), transparent) 42%, transparent 80%),
       var(--scrim-base);
   }
+  /* Layar sempit: teks menutupi seluruh lebar, jadi scrim minimum lebih kuat. */
+  @media (max-width: 63.99rem) { .hero-media__scrim { background: linear-gradient(90deg, color-mix(in srgb, var(--scrim-color) var(--scrim-left-a), transparent) 0%, color-mix(in srgb, var(--scrim-color) var(--scrim-left-b), transparent) 42%, transparent 80%), var(--scrim-base-narrow); } }
   @media (prefers-reduced-motion: reduce) {
     .hero-media__layer, .hero-media video { transition: none; }
   }

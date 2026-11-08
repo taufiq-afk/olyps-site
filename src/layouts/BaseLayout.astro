@@ -26,7 +26,7 @@ const themeCss = buildThemeCss();
 const origin = Astro.site ?? Astro.url.origin;
 const absolute = (path: string) => new URL(path, origin).href;
 const pageUrl = absolute(Astro.url.pathname);
-const ogImage = absolute(`${base}/${siteConfig.hero.dark.poster}`);
+const ogImage = absolute(`${base}/${siteConfig.ogImage}`);
 const locales = { en: 'en_US', id: 'id_ID' } as const;
 const firstSegment = Astro.url.pathname.replace(base, '').split('/').filter(Boolean)[0];
 const alternates = isLang(firstSegment)
@@ -50,8 +50,8 @@ const alternates = isLang(firstSegment)
     <meta property="og:locale" content={locales[lang]} />
     {siteLangs.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={locales[l]} />)}
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1920" />
-    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={t('og.image.alt')} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />

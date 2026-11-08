@@ -33,8 +33,11 @@ const check = (label, fg, bg) => {
   console.log(`${ok ? 'OK   ' : 'GAGAL'} ${label} ${r.toFixed(2)}`);
 };
 
+// Lebar kolom teks hero di layar lebar (grid 1.3fr : 1fr di container 86rem), sebagai bagian dari lebar poster.
+const TEXT_ZONE = 0.56;
+
 // Sel paling terang dan paling gelap pada poster (grid 32x18, dirata-ratakan sehingga mendekati efek blur).
-async function extremes(posterPath) {
+async function extremes(posterPath, maxX = 1) {
   const { data, info } = await sharp(new URL(`../public/${posterPath}`, import.meta.url).pathname)
     .resize(32, 18, { fit: 'fill' })
     .raw()
@@ -44,6 +47,8 @@ async function extremes(posterPath) {
   let hi = -1;
   let lo = 2;
   for (let i = 0; i < info.width * info.height; i++) {
+    // maxX membatasi ke bagian kiri poster (kolom teks hero di layar lebar).
+    if ((i % info.width) / info.width >= maxX) continue;
     const px = [data[i * info.channels], data[i * info.channels + 1], data[i * info.channels + 2]];
     const l = luminance(px);
     if (l > hi) { hi = l; brightest = px; }
@@ -89,10 +94,21 @@ for (const [name, s] of Object.entries(siteConfig.themes)) {
       check(`${name} kaca-media aksen ${key}/glass di atas poster ${label}`, toRgb(acc[name].accent), mg);
     }
 
-    // Hero: teks langsung di atas poster yang diberi scrim minimum.
-    const scrimmed = mix(toRgb(hero.scrimColor), bg, hero.scrim);
-    check(`${name} hero text/poster+scrim ${label}`, toRgb(hero.text), scrimmed);
-    check(`${name} hero textMuted/poster+scrim ${label}`, toRgb(hero.textMuted), scrimmed);
+    // Hero, layar sempit (<64rem): teks menutupi seluruh poster, hanya scrim minimum sempit yang dihitung (gradasi diabaikan).
+    const narrow = mix(toRgb(hero.scrimColor), bg, hero.scrimNarrow);
+    check(`${name} hero sempit text/poster+scrim ${label}`, toRgb(hero.text), narrow);
+    check(`${name} hero sempit textMuted/poster+scrim ${label}`, toRgb(hero.textMuted), narrow);
+  }
+
+  // Hero, layar lebar: teks hanya di kolom kiri (sampai ${TEXT_ZONE * 100}% lebar), di atas scrim minimum ditambah gradasi kiri
+  // (0% = scrimLeft[0], 42% = scrimLeft[1], 80% = 0). Dihitung di tepi kanan kolom teks, tempat gradasi paling tipis.
+  const zone = await extremes(hero.poster, TEXT_ZONE);
+  const g = hero.scrimLeft[1] * Math.max(0, (0.8 - TEXT_ZONE) / (0.8 - 0.42));
+  const alpha = g + hero.scrim * (1 - g);
+  for (const [label, bg] of [['terang', zone.brightest], ['gelap', zone.darkest]]) {
+    const scrimmed = mix(toRgb(hero.scrimColor), bg, alpha);
+    check(`${name} hero lebar text/poster kiri+scrim ${label}`, toRgb(hero.text), scrimmed);
+    check(`${name} hero lebar textMuted/poster kiri+scrim ${label}`, toRgb(hero.textMuted), scrimmed);
   }
 }
 
