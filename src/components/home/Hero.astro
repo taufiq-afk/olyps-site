@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUpRight, Pause, Play } from '@lucide/astro';
 import { siteConfig, type Lang } from '../../site.config';
 import { useTranslations } from '../../i18n/utils';
 import type { UiKey } from '../../i18n/ui';
-import { entrySlug } from '../../i18n/content';
+import { entrySlug, getHome } from '../../i18n/content';
 import PlaceholderBadge from '../PlaceholderBadge.astro';
 
 interface Props {
@@ -14,22 +14,23 @@ interface Props {
 }
 const { lang, project } = Astro.props;
 const t = useTranslations(lang);
+const home = await getHome(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <section class="hero" aria-labelledby="hero-title">
   <div class:list={['container hero__grid', !project && 'hero__grid--single']}>
     <div class="hero__copy">
-      <p class="hero__eyebrow reveal">{siteConfig.descriptor[lang]}</p>
-      <h1 id="hero-title" class="reveal">{siteConfig.tagline[lang]}</h1>
-      <p class="hero__lead reveal">{t('hero.lead')}</p>
+      <p class="hero__eyebrow reveal">{home.eyebrow}</p>
+      <h1 id="hero-title" class="reveal">{home.tagline}</h1>
+      <p class="hero__lead reveal">{home.lead}</p>
       <div class="hero__actions reveal">
-        <a class="btn btn--primary" href="#explore">{t('hero.cta.explore')}<ArrowDown size={18} aria-hidden="true" /></a>
+        <a class="btn btn--primary" href="#explore">{home.ctaLabel}<ArrowDown size={18} aria-hidden="true" /></a>
       </div>
     </div>
 
     {project && (
       <a class="hero__card card--lg glass reveal" data-glow href={`${base}/${lang}/projects/${entrySlug(project.id)}/`}>
-        <p class="eyebrow">{t('hero.card.label')}</p>
+        <p class="eyebrow">{home.featuredLabel}</p>
         <div class="hero__card-head">
           <h2>{project.data.title}</h2>
           <StatusLine lang={lang} status={project.data.status} startDate={project.data.startDate} endDate={project.data.endDate} />

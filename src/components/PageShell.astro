@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from './Navbar.astro';
 import PageBanner from './PageBanner.astro';
 import Footer from './Footer.astro';
+import ContentWarnings from './ContentWarnings.astro';
 import type { Lang } from '../site.config';
 
 interface Props {
@@ -20,6 +21,7 @@ const { lang, current, title, lead, banner = '50% 50%', split = false } = Astro.
 ---
 <BaseLayout lang={lang} title={title}>
   <Navbar lang={lang} current={current} />
+  <ContentWarnings scope={current} />
   <main id="content" class="container page-top page">
     <PageBanner position={banner} />
     <div class:list={[split && 'page-split']}>

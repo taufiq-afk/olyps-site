@@ -1,8 +1,7 @@
 ---
 import { BookOpen, FlaskConical, Users } from '@lucide/astro';
 import { type Lang } from '../../site.config';
-import { useTranslations } from '../../i18n/utils';
-import type { UiKey } from '../../i18n/ui';
+import { getHome } from '../../i18n/content';
 import Widget from '../Widget.astro';
 
 interface Props {
@@ -11,23 +10,24 @@ interface Props {
   counts: { research: number; publications: number; people: number };
 }
 const { lang, counts } = Astro.props;
-const t = useTranslations(lang);
+const home = await getHome(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const to = (key: string) => `${base}/${lang}/${key}/`;
 // Jumlah entri, atau keadaan kosong bila belum ada.
 const body = (kind: 'research' | 'publications' | 'people') => {
   const n = counts[kind];
-  if (n === 0) return t('empty.nothing');
-  return t(`count.${kind}.${n === 1 ? 'one' : 'other'}` as UiKey).replace('{n}', String(n));
+  if (n === 0) return home.exploreEmpty;
+  const text = { research: [home.exploreResearchOne, home.exploreResearchOther], publications: [home.explorePublicationsOne, home.explorePublicationsOther], people: [home.explorePeopleOne, home.explorePeopleOther] }[kind];
+  return text[n === 1 ? 0 : 1].replace('{n}', String(n));
 };
 ---
 <section class="explore" aria-labelledby="explore">
   <div class="container explore__inner">
-    <h2 id="explore" class="reveal">{t('explore.title')}</h2>
+    <h2 id="explore" class="reveal">{home.exploreTitle}</h2>
     <div class="explore__widgets">
-      <div class="reveal" data-reveal="left" style="--i:0"><Widget icon={FlaskConical} title={t('nav.research')} body={body('research')} href={to('research')} /></div>
-      <div class="reveal" style="--i:1"><Widget icon={BookOpen} title={t('nav.publications')} body={body('publications')} href={to('publications')} /></div>
-      <div class="reveal" data-reveal="right" style="--i:2"><Widget icon={Users} title={t('nav.people')} body={body('people')} href={to('people')} /></div>
+      <div class="reveal" data-reveal="left" style="--i:0"><Widget icon={FlaskConical} title={home.exploreResearchTitle} body={body('research')} href={to('research')} /></div>
+      <div class="reveal" style="--i:1"><Widget icon={BookOpen} title={home.explorePublicationsTitle} body={body('publications')} href={to('publications')} /></div>
+      <div class="reveal" data-reveal="right" style="--i:2"><Widget icon={Users} title={home.explorePeopleTitle} body={body('people')} href={to('people')} /></div>
     </div>
   </div>
 </section>

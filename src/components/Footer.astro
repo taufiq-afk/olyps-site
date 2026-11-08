@@ -5,7 +5,7 @@ import { useTranslations } from '../i18n/utils';
 import type { UiKey } from '../i18n/ui';
 import ThemeToggle from './ThemeToggle.astro';
 import LangSwitch from './LangSwitch.astro';
-import { entrySlug, getContact, getLocalized, hrefFor } from '../i18n/content';
+import { entrySlug, getContact, getFooter, getLocalized, getSite, hrefFor } from '../i18n/content';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -16,6 +16,12 @@ const to = (path: string) => `${base}/${lang}/${path}`;
 const projectEntries = (await getLocalized('projects', lang)).slice(0, 3);
 const researchEntries = (await getLocalized('research', lang)).slice(0, 3);
 const contact = await getContact(lang);
+const footer = await getFooter(lang);
+const site = await getSite(lang);
+const navLabels = { projects: site.navProjects, research: site.navResearch, publications: site.navPublications, people: site.navPeople, contact: site.navContact };
+// Tahun dan tanggal pembaruan dihitung otomatis dari waktu build.
+const built = new Date();
+const updated = built.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 <footer class="footer">
   <div class="container">
@@ -23,23 +29,23 @@ const contact = await getContact(lang);
       <div class="footer__brand">
         <a class="footer__logo" href={to('')} aria-label={siteConfig.logo.alt}>
           <span class="brand__mark" aria-hidden="true" style={`--mark: url(${base}/${siteConfig.logo.mark})`}></span>
-          <span class="brand__name">{siteConfig.name}</span>
+          <span class="brand__name">{site.name}</span>
         </a>
-        <p>{t('footer.desc')}</p>
+        <p>{footer.description}</p>
       </div>
 
       <nav class="footer__col" aria-labelledby="footer-explore">
-        <h2 id="footer-explore" class="footer__title">{t('footer.explore')}</h2>
+        <h2 id="footer-explore" class="footer__title">{footer.exploreTitle}</h2>
         <ul>
           {siteConfig.nav.map((key) => (
-            <li><a href={to(`${key}/`)}>{t(`nav.${key}` as UiKey)}</a></li>
+            <li><a href={to(`${key}/`)}>{navLabels[key]}</a></li>
           ))}
         </ul>
       </nav>
 
       {projectEntries.length > 0 && (
       <nav class="footer__col" aria-labelledby="footer-projects">
-        <h2 id="footer-projects" class="footer__title">{t('footer.projects')}</h2>
+        <h2 id="footer-projects" class="footer__title">{footer.projectsTitle}</h2>
         <ul>
           {projectEntries.map((e) => <li><a href={hrefFor('projects', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
         </ul>
@@ -48,7 +54,7 @@ const contact = await getContact(lang);
 
       {researchEntries.length > 0 && (
       <nav class="footer__col" aria-labelledby="footer-research">
-        <h2 id="footer-research" class="footer__title">{t('footer.research')}</h2>
+        <h2 id="footer-research" class="footer__title">{footer.researchTitle}</h2>
         <ul>
           {researchEntries.map((e) => <li><a href={hrefFor('research', entrySlug(e.id), lang)}>{e.data.title}</a></li>)}
         </ul>
@@ -56,7 +62,7 @@ const contact = await getContact(lang);
       )}
 
       <div class="footer__col">
-        <h2 class="footer__title">{t('footer.connect')}</h2>
+        <h2 class="footer__title">{footer.connectTitle}</h2>
         <ul>
           {contact.links.map((link) => (
             <li><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a></li>
@@ -66,10 +72,16 @@ const contact = await getContact(lang);
       </div>
     </div>
 
-    <p class="footer__note">{t('footer.note')}</p>
+    <p class="footer__note">{footer.note}</p>
 
     <div class="footer__bottom">
-      <p class="footer__copy">© 2026 OLYPS</p>
+      <p class="footer__copy">
+        <span>© {built.getFullYear()} {footer.copyrightHolder}</span>
+        {footer.showUpdated && <span>{footer.updatedLabel} <time datetime={built.toISOString()}>{updated}</time></span>}
+        {footer.showSource && footer.sourceUrl && (
+          <a href={footer.sourceUrl} target="_blank" rel="noopener noreferrer">{footer.sourceLabel}<ExternalLink size={14} aria-hidden="true" /><span class="sr-only"> ({t('a11y.newTab')})</span></a>
+        )}
+      </p>
       <div class="footer__controls">
         <LangSwitch lang={lang} />
         <span class="footer__theme"><ThemeToggle lang={lang} /></span>
@@ -89,6 +101,9 @@ const contact = await getContact(lang);
   .footer__col a { color: var(--text-muted); text-decoration: none; }
   .footer__col a svg { margin-inline-start: 0.3em; vertical-align: -0.15em; }
   .footer__col a:hover { color: var(--text); text-decoration: underline; }
+  .footer__copy { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin: 0; }
+  .footer__copy a { color: var(--text-muted); }
+  .footer__copy a svg { margin-inline-start: 0.3em; vertical-align: -0.15em; }
   .footer__muted { color: var(--text-muted); }
   .footer__note { margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--border); max-width: 60rem; }
   .footer__bottom { margin-top: var(--space-5); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }

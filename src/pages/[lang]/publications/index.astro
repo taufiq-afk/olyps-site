@@ -3,7 +3,7 @@ import { BookOpen, ExternalLink } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
 import Related from '../../../components/Related.astro';
-import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
+import { entrySlug, getLocalized, getPage, getRelated } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
 import { siteLangs, type Lang } from '../../../site.config';
 
@@ -15,6 +15,7 @@ const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const entries = await getLocalized('publications', lang);
+const page = await getPage('publications', lang);
 const people = await getLocalized('people', lang);
 const slugOf = new Map(people.map((p) => [p.data.translationKey, entrySlug(p.id)]));
 const rows = await Promise.all(entries.map(async (entry) => ({
@@ -23,12 +24,12 @@ const rows = await Promise.all(entries.map(async (entry) => ({
   related: (await getRelated('publications', entry.data.translationKey, lang)).filter((r) => r.kind !== 'people'),
 })));
 ---
-<PageShell lang={lang} current="publications" title={t('nav.publications')} banner="22% 40%">
+<PageShell lang={lang} current="publications" title={page.title} lead={page.lead} banner="22% 40%">
   {rows.length === 0 ? (
     <div class="card empty">
       <span class="icon-tile"><BookOpen size={26} aria-hidden="true" /></span>
-      <h2>{t('pub.empty.title')}</h2>
-      <p>{t('pub.empty.body')}</p>
+      {page.emptyTitle && <h2>{page.emptyTitle}</h2>}
+      {page.emptyBody && <p>{page.emptyBody}</p>}
     </div>
   ) : (
     <ol class="pubs">

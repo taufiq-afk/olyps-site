@@ -2,7 +2,7 @@
 import { Menu, X, FlaskConical, Folder, Users, BookOpen, Mail } from '@lucide/astro';
 import { siteConfig, type Lang } from '../site.config';
 import { useTranslations } from '../i18n/utils';
-import type { UiKey } from '../i18n/ui';
+import { getSite } from '../i18n/content';
 import ThemeToggle from './ThemeToggle.astro';
 import LangSwitch from './LangSwitch.astro';
 
@@ -21,12 +21,14 @@ interface Props {
 }
 const { lang, current, demo = false, inline = false, uid = 'main', glass = 'theme' } = Astro.props;
 const t = useTranslations(lang);
+const site = await getSite(lang);
+const navLabels = { projects: site.navProjects, research: site.navResearch, publications: site.navPublications, people: site.navPeople, contact: site.navContact };
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const icons = { research: FlaskConical, projects: Folder, people: Users, publications: BookOpen, contact: Mail };
 const items = siteConfig.nav.map((key) => ({
   key,
   href: demo ? '#' : `${base}/${lang}/${key}/`,
-  label: t(`nav.${key}` as UiKey),
+  label: navLabels[key],
   Icon: icons[key],
 }));
 const menuId = `mobile-menu-${uid}`;
@@ -35,7 +37,7 @@ const menuId = `mobile-menu-${uid}`;
   <div class="container navbar__grid">
     <a class="capsule glass brand" href={`${base}/${lang}/`} aria-label={siteConfig.logo.alt}>
       <span class="brand__mark" aria-hidden="true" style={`--mark: url(${base}/${siteConfig.logo.mark})`}></span>
-      <span class="brand__name">{siteConfig.name}</span>
+      <span class="brand__name">{site.name}</span>
     </a>
 
     <nav class="capsule glass nav-links" aria-label={t('nav.main')} data-nav data-demo={demo ? '' : undefined}>

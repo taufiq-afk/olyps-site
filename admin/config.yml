@@ -31,13 +31,120 @@ media_libraries:
           width: 1920
           height: 1920
 
-
-# Urutan menu mengikuti situs: Home (unggulan), Projects, Research, Publications, People, Contact. Tab Assets bawaan Sveltia ada di akhir.
-# Urutan field di tiap koleksi mengikuti urutan tampil di halaman (atas ke bawah), lalu field penerbitan di bagian bawah.
+# Menu admin mengikuti situs: Home, Projects, Research, Publications, People, Page titles and intros, Contact, Footer and Global, lalu tab Assets bawaan Sveltia.
+# Urutan field di tiap formulir mengikuti urutan tampil di halaman, field penerbitan di bagian bawah. Setiap field punya petunjuk.
 collections:
   - name: home
-    label: "Home: featured projects"
+    label: Home
+    i18n: true
     files:
+      - name: text
+        label: Home text
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/home/{{locale}}/home.md
+        fields:
+          - name: eyebrow
+            label: Eyebrow
+            widget: string
+            i18n: true
+            hint: Small line above the main heading in the hero.
+          - name: tagline
+            label: Tagline
+            widget: string
+            i18n: true
+            hint: Main heading of the hero. Also the site title on Home.
+          - name: lead
+            label: Lead
+            widget: text
+            i18n: true
+            hint: Sentence under the heading in the hero.
+          - name: ctaLabel
+            label: Main button label
+            widget: string
+            i18n: true
+            hint: Label of the hero button that scrolls to the next section.
+          - name: featuredLabel
+            label: Featured card label
+            widget: string
+            i18n: true
+            hint: Small label on the featured project card in the hero.
+          - name: exploreTitle
+            label: "Next steps: title"
+            widget: string
+            i18n: true
+            hint: Heading of the "Where to look next" section.
+          - name: exploreResearchTitle
+            label: "Card Research: title"
+            widget: string
+            i18n: true
+            hint: Heading of the first card.
+          - name: exploreResearchOne
+            label: "Card Research: one entry"
+            widget: string
+            i18n: true
+            hint: Text when there is exactly one research entry. Use {n} where the number goes.
+          - name: exploreResearchOther
+            label: "Card Research: several entries"
+            widget: string
+            i18n: true
+            hint: Text when there are several research entries. Use {n} where the number goes.
+          - name: explorePublicationsTitle
+            label: "Card Publications: title"
+            widget: string
+            i18n: true
+            hint: Heading of the second card.
+          - name: explorePublicationsOne
+            label: "Card Publications: one entry"
+            widget: string
+            i18n: true
+            hint: Text when there is exactly one publication. Use {n} where the number goes.
+          - name: explorePublicationsOther
+            label: "Card Publications: several entries"
+            widget: string
+            i18n: true
+            hint: Text when there are several publications. Use {n} where the number goes.
+          - name: explorePeopleTitle
+            label: "Card People: title"
+            widget: string
+            i18n: true
+            hint: Heading of the third card.
+          - name: explorePeopleOne
+            label: "Card People: one person"
+            widget: string
+            i18n: true
+            hint: Text when there is exactly one person. Use {n} where the number goes.
+          - name: explorePeopleOther
+            label: "Card People: several people"
+            widget: string
+            i18n: true
+            hint: Text when there are several people. Use {n} where the number goes.
+          - name: exploreEmpty
+            label: "Cards: empty text"
+            widget: string
+            i18n: true
+            hint: Shown on a card that has no entries yet.
+          - name: whatTitle
+            label: "What we work on: title"
+            widget: string
+            i18n: true
+            hint: Heading of the featured projects section. The projects come from the Featured projects list.
+          - name: whatEmpty
+            label: "What we work on: empty text"
+            widget: string
+            i18n: true
+            hint: Shown when no featured project can be shown.
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "home" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
       - name: featured
         label: Featured projects
         file: src/data/featured.json
@@ -61,6 +168,7 @@ collections:
                 - translationKey
               display_fields:
                 - title
+        i18n: false
   - name: projects
     label: Projects
     label_singular: Project
@@ -79,8 +187,7 @@ collections:
         widget: string
         i18n: true
         hint: Page title and card heading.
-      - &a1
-        name: placeholder
+      - name: placeholder
         label: Placeholder
         widget: boolean
         default: true
@@ -91,8 +198,7 @@ collections:
         widget: text
         i18n: true
         hint: One or two sentences, shown on cards and under the title.
-      - &a2
-        name: status
+      - name: status
         label: Status
         widget: select
         options:
@@ -103,8 +209,7 @@ collections:
           - completed
         i18n: duplicate
         hint: Shown on cards and in the Timeline block.
-      - &a3
-        name: startDate
+      - name: startDate
         label: Start date
         widget: string
         required: false
@@ -113,8 +218,7 @@ collections:
           - ^\d{4}-(0[1-9]|1[0-2])$
           - Use YYYY-MM, for example 2026-11
         hint: Optional, format YYYY-MM (for example 2026-11). Shown as "Since Nov 2026".
-      - &a4
-        name: endDate
+      - name: endDate
         label: End date
         widget: string
         required: false
@@ -123,15 +227,13 @@ collections:
           - ^\d{4}-(0[1-9]|1[0-2])$
           - Use YYYY-MM, for example 2027-03
         hint: Format YYYY-MM. Required when status is completed, optional when paused, never before the start date. The form cannot enforce this; the build rejects it.
-      - &a5
-        name: leadsTo
+      - name: leadsTo
         label: Continues as
         widget: list
         required: false
         i18n: duplicate
         hint: Optional. translationKey of a project, research, or publication this work continues as (not itself). One key per row. The build rejects keys that do not exist.
-      - &a6
-        name: leadsToUrl
+      - name: leadsToUrl
         label: Continues at (URL)
         widget: string
         required: false
@@ -160,8 +262,7 @@ collections:
         required: false
         i18n: duplicate
         hint: People who work on this project. Shown in the Related section.
-      - &a12
-        name: relatedResearch
+      - name: relatedResearch
         label: Related research
         widget: relation
         collection: research
@@ -175,8 +276,7 @@ collections:
         required: false
         i18n: duplicate
         hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
-      - &a7
-        name: relatedPublications
+      - name: relatedPublications
         label: Related publications
         widget: relation
         collection: publications
@@ -220,32 +320,28 @@ collections:
         required: false
         i18n: true
         hint: Advanced. Path of the VTT file for this language, relative to public/.
-      - &a8
-        name: order
+      - name: order
         label: Order
         widget: number
         value_type: int
         required: false
         i18n: duplicate
         hint: "Optional. Smaller numbers appear first. Empty entries come last, then newest start date (publications: newest year), then title."
-      - &a9
-        name: draft
+      - name: draft
         label: Draft
         widget: boolean
         default: false
         i18n: duplicate
         hint: Drafts are never published, in development or production.
-      - &a10
-        name: translationKey
+      - name: translationKey
         label: Translation key
         widget: string
         i18n: duplicate
-        pattern: &a14
+        pattern:
           - ^[a-z0-9-]+$
           - Lowercase letters, digits, and hyphens only
         hint: Identifier shared by the EN and ID versions and used by relations. Also the file name. Do not change it after publishing.
-      - &a11
-        name: lang
+      - name: lang
         label: Language
         widget: hidden
         default: "{{locale}}"
@@ -268,7 +364,12 @@ collections:
         widget: string
         i18n: true
         hint: Page title and card heading.
-      - *a1
+      - name: placeholder
+        label: Placeholder
+        widget: boolean
+        default: true
+        i18n: duplicate
+        hint: Shows a "Placeholder" badge. Entries marked as placeholder are hidden from the whole site on production builds. Turn off when the text is final.
       - name: relatedPeople
         label: Authors
         widget: relation
@@ -288,19 +389,57 @@ collections:
         widget: text
         i18n: true
         hint: One or two sentences, shown on cards and under the title.
-      - *a2
-      - *a3
-      - *a4
-      - *a5
-      - *a6
+      - name: status
+        label: Status
+        widget: select
+        options:
+          - concept
+          - exploratory
+          - ongoing
+          - paused
+          - completed
+        i18n: duplicate
+        hint: Shown on cards and in the Timeline block.
+      - name: startDate
+        label: Start date
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^\d{4}-(0[1-9]|1[0-2])$
+          - Use YYYY-MM, for example 2026-11
+        hint: Optional, format YYYY-MM (for example 2026-11). Shown as "Since Nov 2026".
+      - name: endDate
+        label: End date
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^\d{4}-(0[1-9]|1[0-2])$
+          - Use YYYY-MM, for example 2027-03
+        hint: Format YYYY-MM. Required when status is completed, optional when paused, never before the start date. The form cannot enforce this; the build rejects it.
+      - name: leadsTo
+        label: Continues as
+        widget: list
+        required: false
+        i18n: duplicate
+        hint: Optional. translationKey of a project, research, or publication this work continues as (not itself). One key per row. The build rejects keys that do not exist.
+      - name: leadsToUrl
+        label: Continues at (URL)
+        widget: string
+        required: false
+        i18n: duplicate
+        pattern:
+          - ^https?://\S+$
+          - Use a full URL starting with https://
+        hint: Optional external link shown under "Continues as". Opens in a new tab.
       - name: body
         label: Body
         widget: markdown
         required: false
         i18n: true
         hint: "Sections used: Question or hypothesis, Methods, Findings. Leave a section out and it is not shown."
-      - &a13
-        name: relatedProjects
+      - name: relatedProjects
         label: Related projects
         widget: relation
         collection: projects
@@ -314,7 +453,20 @@ collections:
         required: false
         i18n: duplicate
         hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
-      - *a7
+      - name: relatedPublications
+        label: Related publications
+        widget: relation
+        collection: publications
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
       - name: area
         label: Area
         widget: select
@@ -324,10 +476,32 @@ collections:
         required: false
         i18n: duplicate
         hint: Optional topic area. Not displayed yet.
-      - *a8
-      - *a9
-      - *a10
-      - *a11
+      - name: order
+        label: Order
+        widget: number
+        value_type: int
+        required: false
+        i18n: duplicate
+        hint: "Optional. Smaller numbers appear first. Empty entries come last, then newest start date (publications: newest year), then title."
+      - name: draft
+        label: Draft
+        widget: boolean
+        default: false
+        i18n: duplicate
+        hint: Drafts are never published, in development or production.
+      - name: translationKey
+        label: Translation key
+        widget: string
+        i18n: duplicate
+        pattern:
+          - ^[a-z0-9-]+$
+          - Lowercase letters, digits, and hyphens only
+        hint: Identifier shared by the EN and ID versions and used by relations. Also the file name. Do not change it after publishing.
+      - name: lang
+        label: Language
+        widget: hidden
+        default: "{{locale}}"
+        i18n: true
   - name: publications
     label: Publications
     label_singular: Publication
@@ -344,7 +518,12 @@ collections:
         widget: string
         i18n: true
         hint: Exact title as published.
-      - *a1
+      - name: placeholder
+        label: Placeholder
+        widget: boolean
+        default: true
+        i18n: duplicate
+        hint: Shows a "Placeholder" badge. Entries marked as placeholder are hidden from the whole site on production builds. Turn off when the text is final.
       - name: authors
         label: Authors
         widget: list
@@ -391,8 +570,34 @@ collections:
         required: false
         i18n: duplicate
         hint: Optional. The DOI only, without https://doi.org/. The link opens in a new tab.
-      - *a12
-      - *a13
+      - name: relatedResearch
+        label: Related research
+        widget: relation
+        collection: research
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - name: relatedProjects
+        label: Related projects
+        widget: relation
+        collection: projects
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
       - name: relatedPeople
         label: Related people
         widget: relation
@@ -407,10 +612,32 @@ collections:
         required: false
         i18n: duplicate
         hint: Shown in the Related section. Authors linked above are added automatically.
-      - *a8
-      - *a9
-      - *a10
-      - *a11
+      - name: order
+        label: Order
+        widget: number
+        value_type: int
+        required: false
+        i18n: duplicate
+        hint: "Optional. Smaller numbers appear first. Empty entries come last, then newest start date (publications: newest year), then title."
+      - name: draft
+        label: Draft
+        widget: boolean
+        default: false
+        i18n: duplicate
+        hint: Drafts are never published, in development or production.
+      - name: translationKey
+        label: Translation key
+        widget: string
+        i18n: duplicate
+        pattern:
+          - ^[a-z0-9-]+$
+          - Lowercase letters, digits, and hyphens only
+        hint: Identifier shared by the EN and ID versions and used by relations. Also the file name. Do not change it after publishing.
+      - name: lang
+        label: Language
+        widget: hidden
+        default: "{{locale}}"
+        i18n: true
   - name: people
     label: People
     label_singular: Person
@@ -440,7 +667,12 @@ collections:
         widget: string
         i18n: true
         hint: "Professional role, not a position at OLYPS. For example: Computer Vision Engineer."
-      - *a1
+      - name: placeholder
+        label: Placeholder
+        widget: boolean
+        default: true
+        i18n: duplicate
+        hint: Shows a "Placeholder" badge. Entries marked as placeholder are hidden from the whole site on production builds. Turn off when the text is final.
       - name: bio
         label: Bio
         widget: text
@@ -474,13 +706,238 @@ collections:
         required: false
         i18n: duplicate
         hint: Short tags, one per row.
-      - *a12
-      - *a13
-      - *a7
-      - *a8
-      - *a9
-      - *a10
-      - *a11
+      - name: relatedResearch
+        label: Related research
+        widget: relation
+        collection: research
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - name: relatedProjects
+        label: Related projects
+        widget: relation
+        collection: projects
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - name: relatedPublications
+        label: Related publications
+        widget: relation
+        collection: publications
+        value_field: translationKey
+        search_fields:
+          - title
+          - translationKey
+        display_fields:
+          - title
+        multiple: true
+        required: false
+        i18n: duplicate
+        hint: "Shown in the Related section at the bottom of the page. Links are two-way: one side is enough."
+      - name: order
+        label: Order
+        widget: number
+        value_type: int
+        required: false
+        i18n: duplicate
+        hint: "Optional. Smaller numbers appear first. Empty entries come last, then newest start date (publications: newest year), then title."
+      - name: draft
+        label: Draft
+        widget: boolean
+        default: false
+        i18n: duplicate
+        hint: Drafts are never published, in development or production.
+      - name: translationKey
+        label: Translation key
+        widget: string
+        i18n: duplicate
+        pattern:
+          - ^[a-z0-9-]+$
+          - Lowercase letters, digits, and hyphens only
+        hint: Identifier shared by the EN and ID versions and used by relations. Also the file name. Do not change it after publishing.
+      - name: lang
+        label: Language
+        widget: hidden
+        default: "{{locale}}"
+        i18n: true
+  - name: pages
+    label: Page titles and intros
+    i18n: true
+    files:
+      - name: projects
+        label: Projects page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/projects.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and Global.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "projects" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: research
+        label: Research page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/research.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and Global.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "research" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: publications
+        label: Publications page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/publications.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and Global.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "publications" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: people
+        label: People page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/people.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and Global.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "people" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
   - name: contact
     label: Contact
     label_singular: Contact page
@@ -532,6 +989,151 @@ collections:
         label: Translation key
         widget: string
         i18n: duplicate
-        pattern: *a14
+        pattern:
+          - ^[a-z0-9-]+$
+          - Lowercase letters, digits, and hyphens only
         hint: Keep as "contact" in both languages.
-      - *a11
+      - name: lang
+        label: Language
+        widget: hidden
+        default: "{{locale}}"
+        i18n: true
+  - name: footer_global
+    label: Footer and Global
+    i18n: true
+    files:
+      - name: footer
+        label: Footer
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/footer/{{locale}}/footer.md
+        fields:
+          - name: description
+            label: Description
+            widget: text
+            i18n: true
+            hint: Short text next to the logo.
+          - name: exploreTitle
+            label: "Column: Explore title"
+            widget: string
+            i18n: true
+            hint: Heading of the first column (links to all pages).
+          - name: projectsTitle
+            label: "Column: Projects title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with up to 3 projects, in display order.
+          - name: researchTitle
+            label: "Column: Research title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with up to 3 research entries, in display order.
+          - name: connectTitle
+            label: "Column: Connect title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with the links from the Contact page.
+          - name: note
+            label: Concept note
+            widget: text
+            i18n: true
+            hint: Line above the bottom row about concepts and assumptions.
+          - name: copyrightHolder
+            label: Copyright holder
+            widget: string
+            i18n: true
+            hint: Shown as "© {year} {holder}". The year is the build year.
+          - name: showUpdated
+            label: Show last updated
+            widget: boolean
+            default: true
+            i18n: duplicate
+            hint: "On: shows the date of the latest build automatically."
+          - name: updatedLabel
+            label: Last updated label
+            widget: string
+            i18n: true
+            hint: Text before the build date, for example "Last updated".
+          - name: showSource
+            label: Show source code link
+            widget: boolean
+            default: false
+            i18n: duplicate
+            hint: "Off by default. On: shows a link to the repository below."
+          - name: sourceLabel
+            label: Source code label
+            widget: string
+            i18n: true
+            hint: Link text, for example "Source code".
+          - name: sourceUrl
+            label: Source code URL
+            widget: string
+            required: false
+            i18n: duplicate
+            pattern:
+              - ^https?://\S+$
+              - Use a full URL starting with https://
+            hint: Required when the source code link is on. Opens in a new tab.
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "footer" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: site
+        label: Global
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/site/{{locale}}/site.md
+        fields:
+          - name: name
+            label: Site name
+            widget: string
+            i18n: true
+            hint: Wordmark in the header and footer, and in page titles.
+          - name: navProjects
+            label: "Menu: Projects"
+            widget: string
+            i18n: true
+            hint: Label of the Projects link in the menu and footer.
+          - name: navResearch
+            label: "Menu: Research"
+            widget: string
+            i18n: true
+            hint: Label of the Research link.
+          - name: navPublications
+            label: "Menu: Publications"
+            widget: string
+            i18n: true
+            hint: Label of the Publications link.
+          - name: navPeople
+            label: "Menu: People"
+            widget: string
+            i18n: true
+            hint: Label of the People link.
+          - name: navContact
+            label: "Menu: Contact"
+            widget: string
+            i18n: true
+            hint: Label of the Contact link. Also the title of the Contact page.
+          - name: description
+            label: Meta description
+            widget: text
+            i18n: true
+            hint: Description for search results and link previews. Not visible on the page.
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "site" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true

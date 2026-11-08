@@ -30,21 +30,7 @@ const SITE = env('OLYPS_SITE') ?? 'https://taufiq-afk.github.io';
 const BASE = env('OLYPS_BASE') ?? '/olyps-site';
 
 export const siteConfig = {
-  name: 'OLYPS',
-  shortName: 'OLYPS',
-  // Jangan klaim status institusi resmi (lihat aturan di CLAUDE.md).
-  descriptor: {
-    en: 'An independent space for applied AI',
-    id: 'Ruang independen untuk AI terapan',
-  },
-  tagline: {
-    en: 'Applied AI for health and the environment.',
-    id: 'AI terapan untuk kesehatan dan lingkungan.', // PLACEHOLDER: terjemahan sementara
-  },
-  description: {
-    en: 'OLYPS is an independent space for learning and exploring applied AI for health and the environment.',
-    id: 'OLYPS adalah ruang belajar dan eksplorasi AI terapan untuk kesehatan dan lingkungan.',
-  },
+  // Nama situs, tagline, deskripsi, dan label menu ada di konten (admin: Footer and Global dan Home), per bahasa.
 
   // GitHub Pages (project site). Dibaca oleh astro.config.mjs. URL absolut Open Graph dan hreflang memakai `site`.
   site: SITE || undefined,

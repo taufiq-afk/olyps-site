@@ -9,7 +9,7 @@ Situs OLYPS, sebuah ruang independen untuk belajar dan mengeksplorasi AI terapan
 - Konten (research, projects, people, publications) berupa file Markdown di content collections, dengan placeholder yang jelas ditandai.
 - Dua bahasa: en (utama) dan id, dengan routing terpisah /en dan /id.
 - Dua tema: terang dan gelap (tema siang, sore, malam dan logika jam lokal sudah dihapus). Mode: auto (mengikuti prefers-color-scheme, default), terang, gelap. Pilihan manual disimpan di localStorage dengan try/catch, skrip inline di head mencegah kilatan tema. Kehangatan tema sore dipindahkan menjadi nuansa hangat di tema terang.
-- Identitas situs (nama, tagline, logo, favicon, warna) disatukan dalam satu file konfigurasi agar mudah diganti.
+- Identitas visual (logo, favicon, warna, base dan site) ada di `src/site.config.ts`. Teks situs yang bisa diedit di admin ada di koleksi konten per bahasa: `site` (nama, label menu, deskripsi meta), `home`, `pages` (judul, pengantar, keadaan kosong halaman indeks), `footer`, dan `contact`. Teks wajib yang kosong menggagalkan build. Label teknis (teks pembaca layar, status, pesan) tetap di `src/i18n/ui.ts`.
 - Panel admin ditunda. Struktur konten harus dibuat siap untuk ditambah panel admin nanti.
 
 ## Struktur konten

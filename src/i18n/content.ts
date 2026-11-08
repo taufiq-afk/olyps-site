@@ -31,66 +31,117 @@ const loadAll = async () => ({
 
 type Any = { id: string; data: Record<string, any> };
 
-let validation: Promise<void> | undefined;
+export interface BrokenRelation {
+  /** Jenis halaman terkait: koleksi pemilik berkas, atau home untuk daftar unggulan. */
+  scope: Kind | 'home';
+  file: string;
+  field: string;
+  key: string;
+  /** Pesan lengkap dengan petunjuk perbaikan. */
+  message: string;
+}
 
-/** Validasi konten saat build: relasi, penulis publikasi, kelengkapan bahasa, dan daftar unggulan. */
-export function assertContentValid(): Promise<void> {
-  validation ??= (async () => {
-    const all = (await loadAll()) as unknown as Record<Kind, Any[]>;
-    const errors: string[] = [];
-    const keysOf = (kind: Kind) => new Set(all[kind].map((e) => e.data.translationKey as string));
+interface Validation { errors: string[]; broken: BrokenRelation[] }
 
-    for (const kind of KINDS) {
-      for (const entry of all[kind]) {
-        for (const [target, field] of Object.entries(REL_FIELDS[kind]) as [Kind, string][]) {
-          for (const key of (entry.data[field] ?? []) as string[]) {
-            if (!keysOf(target).has(key)) errors.push(`${kind}/${entry.id}: ${field} merujuk "${key}" yang tidak ada di koleksi ${target}`);
+let validation: Promise<Validation> | undefined;
+const warned = new Set<string>();
+
+const TARGET_LABEL: Record<Kind, string> = { research: 'research', projects: 'projects', publications: 'publications', people: 'people' };
+
+async function computeValidation(): Promise<Validation> {
+  const all = (await loadAll()) as unknown as Record<Kind, Any[]>;
+  const errors: string[] = [];
+  const broken: BrokenRelation[] = [];
+  const keysOf = (kind: Kind) => new Set(all[kind].map((e) => e.data.translationKey as string));
+  const fileOf = (kind: Kind, entry: Any) => `src/content/${kind}/${entry.id}.md`;
+  const addBroken = (scope: BrokenRelation['scope'], file: string, field: string, key: string, where: string, fix: string) =>
+    broken.push({ scope, file, field, key, message: `${file}: field "${field}" menunjuk "${key}" yang tidak ada di ${where}. Perbaikan: ${fix}` });
+
+  for (const kind of KINDS) {
+    for (const entry of all[kind]) {
+      for (const [target, field] of Object.entries(REL_FIELDS[kind]) as [Kind, string][]) {
+        for (const key of (entry.data[field] ?? []) as string[]) {
+          if (!keysOf(target).has(key)) {
+            addBroken(kind, fileOf(kind, entry), field, key, `koleksi ${TARGET_LABEL[target]}`,
+              `hapus "${key}" dari daftar ${field} di berkas itu, atau buat entri ${TARGET_LABEL[target]} dengan translationKey "${key}" (di admin: buka entri tersebut, lalu hapus butir "${key}" dari field relasinya).`);
           }
         }
-        if (kind === 'publications') {
-          for (const author of entry.data.authors as { name: string; personKey?: string }[]) {
-            if (author.personKey && !keysOf('people').has(author.personKey)) {
-              errors.push(`publications/${entry.id}: penulis "${author.name}" memakai personKey "${author.personKey}" yang tidak ada di people`);
-            }
-          }
-        }
       }
-      // Setiap translationKey harus ada di semua bahasa.
-      for (const key of keysOf(kind)) {
-        for (const lang of siteLangs) {
-          if (!all[kind].some((e) => e.data.translationKey === key && e.data.lang === lang)) {
-            errors.push(`${kind}: translationKey "${key}" tidak punya versi ${lang}`);
+      if (kind === 'publications') {
+        for (const author of entry.data.authors as { name: string; personKey?: string }[]) {
+          if (author.personKey && !keysOf('people').has(author.personKey)) {
+            addBroken(kind, fileOf(kind, entry), `authors (${author.name}).personKey`, author.personKey, 'koleksi people',
+              `kosongkan Member pada penulis "${author.name}" (nama tetap tampil sebagai teks biasa), atau buat entri people dengan translationKey "${author.personKey}".`);
           }
         }
       }
     }
-
-    // leadsTo menunjuk entri project, research, atau publication: key harus ada dan tidak ambigu antar koleksi.
-    const leadsKinds: Kind[] = ['projects', 'research', 'publications'];
-    const leadsKeys = new Set<string>();
-    for (const kind of leadsKinds) {
-      for (const key of keysOf(kind)) {
-        if (leadsKeys.has(key)) errors.push(`translationKey "${key}" dipakai di lebih dari satu koleksi (project, research, publication), leadsTo menjadi ambigu`);
-        leadsKeys.add(key);
-      }
-    }
-    for (const kind of ['projects', 'research'] as Kind[]) {
-      for (const entry of all[kind]) {
-        for (const key of (entry.data.leadsTo ?? []) as string[]) {
-          if (!leadsKeys.has(key)) errors.push(`${kind}/${entry.id}: leadsTo merujuk "${key}" yang tidak ada di project, research, atau publication`);
+    // Setiap translationKey harus ada di semua bahasa.
+    for (const key of keysOf(kind)) {
+      for (const lang of siteLangs) {
+        if (!all[kind].some((e) => e.data.translationKey === key && e.data.lang === lang)) {
+          errors.push(`src/content/${kind}/${lang}/: translationKey "${key}" tidak punya versi ${lang}. Perbaikan: buat berkas ${lang}/<nama>.md dengan translationKey yang sama, atau hapus versi bahasa lainnya.`);
         }
       }
     }
+  }
 
-    if (featured.length > FEATURED_MAX) errors.push(`featured: ${featured.length} butir, maksimum ${FEATURED_MAX}`);
-    if (new Set(featured).size !== featured.length) errors.push('featured: ada key ganda');
-    for (const key of featured) {
-      if (!keysOf('projects').has(key)) errors.push(`featured: key "${key}" tidak ada di koleksi projects`);
+  // leadsTo menunjuk entri project, research, atau publication: key harus ada dan tidak ambigu antar koleksi.
+  const leadsKinds: Kind[] = ['projects', 'research', 'publications'];
+  const leadsKeys = new Set<string>();
+  for (const kind of leadsKinds) {
+    for (const key of keysOf(kind)) {
+      if (leadsKeys.has(key)) errors.push(`translationKey "${key}" dipakai di lebih dari satu koleksi (project, research, publication), leadsTo menjadi ambigu. Perbaikan: ganti translationKey salah satunya.`);
+      leadsKeys.add(key);
     }
+  }
+  for (const kind of ['projects', 'research'] as Kind[]) {
+    for (const entry of all[kind]) {
+      for (const key of (entry.data.leadsTo ?? []) as string[]) {
+        if (!leadsKeys.has(key)) {
+          addBroken(kind, fileOf(kind, entry), 'leadsTo', key, 'project, research, atau publication',
+            `hapus "${key}" dari daftar leadsTo di berkas itu, atau buat entri dengan translationKey "${key}".`);
+        }
+      }
+    }
+  }
 
-    if (errors.length) throw new Error(`Konten tidak valid:\n- ${errors.join('\n- ')}`);
-  })();
-  return validation;
+  if (featured.length > FEATURED_MAX) errors.push(`src/data/featured.json: ${featured.length} butir, maksimum ${FEATURED_MAX}. Perbaikan: hapus butir hingga tersisa ${FEATURED_MAX}.`);
+  if (new Set(featured).size !== featured.length) errors.push('src/data/featured.json: ada key ganda. Perbaikan: hapus butir yang sama.');
+  for (const key of featured) {
+    if (!keysOf('projects').has(key)) {
+      addBroken('home', 'src/data/featured.json', 'featured', key, 'koleksi projects',
+        `hapus "${key}" dari daftar di berkas itu (di admin: Home, Featured projects), atau buat proyek dengan translationKey "${key}".`);
+    }
+  }
+  return { errors, broken };
+}
+
+/**
+ * Validasi konten. Kesalahan struktur (versi bahasa hilang, daftar unggulan terlalu panjang atau ganda) selalu menggagalkan build.
+ * Relasi yang putus: di dev dilewati dengan peringatan di konsol dan banner halaman (getBrokenRelations), di build produksi
+ * (dan npm run check:predeploy) tetap menjadi kesalahan dengan petunjuk perbaikan.
+ */
+export async function assertContentValid(): Promise<void> {
+  // Di dev hitung ulang setiap kali agar perbaikan di admin langsung terbaca.
+  if (import.meta.env.DEV || !validation) validation = computeValidation();
+  const { errors, broken } = await validation;
+  const all = [...errors];
+  if (import.meta.env.DEV) {
+    for (const b of broken) {
+      if (!warned.has(b.message)) { warned.add(b.message); console.warn(`[konten] relasi putus dilewati: ${b.message}`); }
+    }
+  } else {
+    all.push(...broken.map((b) => b.message));
+  }
+  if (all.length) throw new Error(`Konten tidak valid (${all.length} masalah):\n- ${all.join('\n- ')}`);
+}
+
+/** Relasi putus untuk banner dev pada halaman terkait. Kosong di build produksi (di sana semuanya sudah menjadi kesalahan). */
+export async function getBrokenRelations(scope: BrokenRelation['scope']): Promise<BrokenRelation[]> {
+  if (!import.meta.env.DEV) return [];
+  await assertContentValid();
+  return (await validation!).broken.filter((b) => b.scope === scope);
 }
 
 /**
@@ -204,4 +255,28 @@ const MONTH_LOCALE: Record<Lang, string> = { en: 'en-US', id: 'id-ID' };
 export function formatMonth(value: string, lang: Lang): string {
   const [y, m] = value.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(MONTH_LOCALE[lang], { month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+type TextCollection = 'site' | 'home' | 'pages' | 'footer';
+
+/** Satu entri teks situs (src/content/<koleksi>/<lang>/<berkas>.md). Entri yang hilang menggagalkan build, tanpa fallback. */
+async function getText<C extends TextCollection>(collection: C, lang: Lang, key: string) {
+  const entry = (await getCollection(collection)).find((e) => e.data.lang === lang && e.data.translationKey === key);
+  if (!entry) throw new Error(`Konten tidak valid:\n- src/content/${collection}/${lang}/${key}.md tidak ada (teks situs wajib ada di kedua bahasa)`);
+  return entry.data;
+}
+
+/** Nama situs, label menu, deskripsi meta (admin: Footer and Global). */
+export const getSite = (lang: Lang) => getText('site', lang, 'site');
+/** Teks halaman Home (admin: Home). */
+export const getHome = (lang: Lang) => getText('home', lang, 'home');
+/** Judul, pengantar, dan keadaan kosong halaman indeks (admin: Page titles and intros). */
+export const getPage = (key: 'projects' | 'research' | 'publications' | 'people', lang: Lang) => getText('pages', lang, key);
+/** Teks footer (admin: Footer and Global). */
+export const getFooter = (lang: Lang) => getText('footer', lang, 'footer');
+
+/** Label menu untuk satu kunci navigasi. */
+export async function getNavLabel(key: 'projects' | 'research' | 'publications' | 'people' | 'contact', lang: Lang): Promise<string> {
+  const site = await getSite(lang);
+  return { projects: site.navProjects, research: site.navResearch, publications: site.navPublications, people: site.navPeople, contact: site.navContact }[key];
 }

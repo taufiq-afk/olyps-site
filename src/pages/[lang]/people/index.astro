@@ -1,7 +1,7 @@
 ---
 import PageShell from '../../../components/PageShell.astro';
 import Avatar from '../../../components/Avatar.astro';
-import { entrySlug, getLocalized } from '../../../i18n/content';
+import { entrySlug, getLocalized, getPage } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
 import { siteLangs, type Lang } from '../../../site.config';
 
@@ -13,11 +13,12 @@ const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const people = await getLocalized('people', lang);
+const page = await getPage('people', lang);
 // Satu grid kompak, kartu sama untuk semua. Afiliasi tidak ditampilkan di kartu, hanya di halaman profil.
 ---
-<PageShell lang={lang} current="people" title={t('nav.people')} banner="82% 88%">
+<PageShell lang={lang} current="people" title={page.title} lead={page.lead} banner="82% 88%">
   {people.length === 0 ? (
-    <div class="card"><h2>{t('empty.nothing')}</h2></div>
+    <div class="card">{page.emptyTitle && <h2>{page.emptyTitle}</h2>}{page.emptyBody && <p>{page.emptyBody}</p>}</div>
   ) : (
     <div class="people-grid">
       {people.map((person) => (

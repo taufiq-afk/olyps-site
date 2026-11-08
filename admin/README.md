@@ -9,7 +9,13 @@ Hanya untuk pengembangan. Folder ini di luar `public/`, dilayani oleh `integrati
 4. Simpan entri di formulir, lalu tinjau dengan `git diff` dan commit sendiri.
 
 ## Menu admin
-Home: featured projects, Projects, Research, Publications, People, Contact, lalu tab Assets bawaan Sveltia. Urutan field di tiap koleksi mengikuti urutan tampil di halaman, field penerbitan (order, draft, translationKey) di bawah. Setiap field punya petunjuk singkat.
+Home (teks Home dan daftar unggulan), Projects, Research, Publications, People, Page titles and intros (judul, pengantar, keadaan kosong keempat halaman indeks), Contact, Footer and Global (footer, nama situs, label menu, deskripsi meta), lalu tab Assets bawaan Sveltia. Urutan field di tiap koleksi mengikuti urutan tampil di halaman, field penerbitan (order, draft, translationKey) di bawah. Setiap field punya petunjuk singkat.
+
+## Relasi yang putus
+Di dev, kunci relasi yang menunjuk entri yang tidak ada dilewati, dengan peringatan di konsol server dan banner kuning di halaman terkait (menyebut berkas dan kuncinya). Di build produksi dan `npm run check:predeploy` hal yang sama menjadi kesalahan, lengkap dengan petunjuk perbaikan.
+
+## Teks situs
+Teks konten ada di `src/content/{site,home,pages,footer,contact}/<lang>/`. Teks wajib yang dikosongkan membuat build gagal dengan pesan yang menyebut field dan berkasnya. Hasil build tetap disaring pemeriksa kata terlarang.
 
 ## Gambar
 - Unggahan masuk `src/assets/<jenis>/` (people, research, projects), diproses Astro, bukan `public/`.
@@ -23,6 +29,9 @@ Home: featured projects, Projects, Research, Publications, People, Contact, lalu
 - Relation widget hanya menunjuk satu koleksi, jadi `leadsTo` (project, research, atau publication) berupa daftar teks translationKey yang divalidasi build.
 - Daftar unggulan bisa diurutkan dengan menyeret (mouse) atau tombol Move Up dan Move Down, tetapi tidak bisa menolak key ganda. Build yang menolaknya.
 - Admin tidak bisa menamai unggahan dari slug. Itu dikerjakan skrip tidy setelah simpan.
+- Satu koleksi Sveltia hanya bisa berisi entri (folder) atau berkas tetap, tidak keduanya. Karena itu judul dan pengantar halaman indeks ada di menu sendiri (Page titles and intros), bukan di dalam Projects, Research, Publications, dan People.
+- Sveltia tidak bisa mewajibkan field hanya saat field lain menyala (mis. URL kode sumber saat tautannya dinyalakan). Skema yang menolaknya saat build.
+- Sveltia menulis string kosong untuk field opsional yang dikosongkan. Skema memperlakukannya sebagai tidak diisi.
 
 ## Sumber kebenaran
 Skema ada di `src/content.config.ts`. Bila skema People berubah, ubah `admin/config.yml` agar sejalan. Build menolak data yang tidak valid, termasuk relasi ke translationKey yang tidak ada.

@@ -2,9 +2,7 @@
 import StatusLine from '../StatusLine.astro';
 import { ArrowUpRight, Folder } from '@lucide/astro';
 import type { Lang } from '../../site.config';
-import { useTranslations } from '../../i18n/utils';
-import type { UiKey } from '../../i18n/ui';
-import { entrySlug } from '../../i18n/content';
+import { entrySlug, getHome } from '../../i18n/content';
 import PlaceholderBadge from '../PlaceholderBadge.astro';
 
 interface Props {
@@ -13,14 +11,14 @@ interface Props {
   projects: { id: string; data: { title: string; summary: string; status: string; placeholder: boolean } }[];
 }
 const { lang, projects } = Astro.props;
-const t = useTranslations(lang);
+const home = await getHome(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 <section class="section what" aria-labelledby="what-title">
   <div class="container">
-    <h2 id="what-title" class="reveal">{t('home.what.title')}</h2>
+    <h2 id="what-title" class="reveal">{home.whatTitle}</h2>
     {projects.length === 0 ? (
-      <p class="what__empty reveal">{t('empty.featured')}</p>
+      <p class="what__empty reveal">{home.whatEmpty}</p>
     ) : (
       <div class="areas">
         {projects.map((project, i) => (

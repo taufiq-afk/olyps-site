@@ -4,6 +4,7 @@ import '../styles/global.css';
 import { siteConfig, siteLangs, type Lang } from '../site.config';
 import { buildThemeCss } from '../styles/themeCss';
 import { isLang, switchLangPath, useTranslations } from '../i18n/utils';
+import { getHome, getSite } from '../i18n/content';
 
 interface Props {
   lang: Lang;
@@ -15,8 +16,10 @@ interface Props {
 const { lang, title, description, noindex = false } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const pageTitle = title ? `${title} | ${siteConfig.name}` : `${siteConfig.name}: ${siteConfig.tagline[lang]}`;
-const pageDescription = description ?? siteConfig.description[lang];
+const site = await getSite(lang);
+const home = await getHome(lang);
+const pageTitle = title ? `${title} | ${site.name}` : `${site.name}: ${home.tagline}`;
+const pageDescription = description ?? site.description;
 const themeCss = buildThemeCss();
 
 // Open Graph. URL absolut memakai `site` dari konfigurasi bila sudah diisi, jika belum memakai origin saat ini.
@@ -40,7 +43,7 @@ const alternates = isLang(firstSegment)
     <meta name="description" content={pageDescription} />
     {(siteConfig.noindex || noindex) && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={pageUrl} />

@@ -7,15 +7,19 @@ import { z } from 'astro/zod';
 // placeholder: true menampilkan badge dan menyembunyikan entri dari Home pada build produksi.
 // Relasi (relatedX) berisi daftar translationKey. Relasi bersifat dua arah dan divalidasi saat build
 // (lihat src/i18n/content.ts).
+// Sveltia menulis string kosong ('') atau null untuk field opsional yang dikosongkan. Keduanya dianggap tidak diisi.
+const opt = <T extends z.ZodTypeAny>(schema: T) => z.preprocess((v) => (v === '' || v === null ? undefined : v), schema.optional());
+
 const common = {
   lang: z.enum(['en', 'id']),
   translationKey: z.string(),
   placeholder: z.boolean().default(true),
   draft: z.boolean().default(false),
   // Urutan tampil: angka kecil lebih dulu, kosong terakhir (lihat compareEntries di src/i18n/content.ts).
-  order: z.number().optional(),
+  order: opt(z.number()),
 };
 const keys = z.array(z.string()).default([]);
+
 
 type ImageFn = Parameters<Extract<Parameters<typeof defineCollection>[0]['schema'], (...a: any[]) => any>>[0]['image'];
 
@@ -25,10 +29,10 @@ const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'gunakan format YYYY-M
 export const STATUSES = ['concept', 'exploratory', 'ongoing', 'paused', 'completed'] as const;
 const lifecycle = {
   status: z.enum(STATUSES),
-  startDate: month.optional(),
-  endDate: month.optional(),
+  startDate: opt(month),
+  endDate: opt(month),
   leadsTo: keys,
-  leadsToUrl: z.string().url().optional(),
+  leadsToUrl: opt(z.string().url()),
 };
 const checkLifecycle = (d: { translationKey: string; status: string; startDate?: string; endDate?: string; leadsTo: string[] }, ctx: z.RefinementCtx) => {
   if (d.status === 'completed' && !d.endDate) ctx.addIssue({ code: 'custom', path: ['endDate'], message: 'endDate wajib bila status completed' });
@@ -49,7 +53,7 @@ const collection = <T extends z.ZodRawShape>(name: string, shape: T | ((image: I
 const research = collection('research', {
   title: z.string(),
   summary: z.string(),
-  area: z.enum(['health', 'environment']).optional(),
+  area: opt(z.enum(['health', 'environment'])),
   ...lifecycle,
   relatedProjects: keys,
   relatedPublications: keys,
@@ -62,12 +66,12 @@ const projects = collection('projects', (image) => ({
   summary: z.string(),
   ...lifecycle,
   // Gambar detail proyek: unggahan ke src/assets/projects (diproses Astro). Kosong: slot media tidak ditampilkan.
-  image: image().optional(),
-  imageAlt: z.string().optional(),
-  imageCaption: z.string().optional(),
+  image: opt(image()),
+  imageAlt: opt(z.string()),
+  imageCaption: opt(z.string()),
   // Klip di public/ (nama dasar tanpa ekstensi) dan berkas VTT untuk bahasa entri ini. Belum ada unggahan video.
-  mediaVideo: z.string().optional(),
-  mediaCaptions: z.string().optional(),
+  mediaVideo: opt(z.string()),
+  mediaCaptions: opt(z.string()),
   relatedResearch: keys,
   relatedPublications: keys,
   relatedPeople: keys,
@@ -84,7 +88,7 @@ const people = collection('people', (image) => ({
   links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
   // Foto opsional, path relatif ke berkas ini menuju src/assets/people/ (diproses Astro: diubah ukuran dan format).
   // Hanya dengan izin orangnya. Kosong: avatar tetap inisial.
-  photo: image().optional(),
+  photo: opt(image()),
   relatedResearch: keys,
   relatedProjects: keys,
   relatedPublications: keys,
@@ -93,11 +97,11 @@ const people = collection('people', (image) => ({
 const publications = collection('publications', {
   title: z.string(),
   // personKey (translationKey di koleksi people) menaut penulis ke halaman profil. Tanpa personKey tampil sebagai teks biasa.
-  authors: z.array(z.object({ name: z.string(), personKey: z.string().optional() })),
+  authors: z.array(z.object({ name: z.string(), personKey: opt(z.string()) })),
   venue: z.string(),
   year: z.number(),
-  pages: z.string().optional(),
-  doi: z.string().optional(),
+  pages: opt(z.string()),
+  doi: opt(z.string()),
   relatedResearch: keys,
   relatedProjects: keys,
   relatedPeople: keys,
@@ -116,8 +120,81 @@ const contact = defineCollection({
       url: z.string().url(),
       kind: z.enum(['github', 'linkedin', 'other']).default('other'),
     })).default([]),
-    email: z.string().email().optional(),
+    email: opt(z.string().email()),
   }),
 });
 
-export const collections = { research, projects, people, publications, contact };
+// Teks situs yang bisa diedit di admin, satu entri per bahasa (src/content/<koleksi>/<lang>/<berkas>.md).
+// Teks wajib tidak boleh kosong: build gagal dengan pesan yang menyebut field dan berkasnya. Tidak ada fallback diam-diam.
+const text = (label: string) => z.string({ error: `${label} wajib diisi` }).trim().min(1, `${label} wajib diisi dan tidak boleh kosong`);
+const textFile = (name: string, shape: z.ZodRawShape, refine?: (d: any, ctx: z.RefinementCtx) => void) =>
+  defineCollection({
+    loader: glob({ base: `./src/content/${name}`, pattern: '**/*.md' }),
+    schema: () => {
+      const object = z.object({ lang: z.enum(['en', 'id']), translationKey: z.string(), ...shape });
+      return refine ? object.superRefine(refine) : object;
+    },
+  });
+
+// Global: nama situs, label menu, deskripsi meta.
+const site = textFile('site', {
+  name: text('name'),
+  description: text('description'),
+  navProjects: text('navProjects'),
+  navResearch: text('navResearch'),
+  navPublications: text('navPublications'),
+  navPeople: text('navPeople'),
+  navContact: text('navContact'),
+});
+
+// Home: hero, kartu Where to look next, dan bagian What we work on. Daftar unggulan ada di src/data/featured.json.
+const home = textFile('home', {
+  eyebrow: text('eyebrow'),
+  tagline: text('tagline'),
+  lead: text('lead'),
+  ctaLabel: text('ctaLabel'),
+  featuredLabel: text('featuredLabel'),
+  exploreTitle: text('exploreTitle'),
+  exploreEmpty: text('exploreEmpty'),
+  exploreResearchTitle: text('exploreResearchTitle'),
+  exploreResearchOne: text('exploreResearchOne'),
+  exploreResearchOther: text('exploreResearchOther'),
+  explorePublicationsTitle: text('explorePublicationsTitle'),
+  explorePublicationsOne: text('explorePublicationsOne'),
+  explorePublicationsOther: text('explorePublicationsOther'),
+  explorePeopleTitle: text('explorePeopleTitle'),
+  explorePeopleOne: text('explorePeopleOne'),
+  explorePeopleOther: text('explorePeopleOther'),
+  whatTitle: text('whatTitle'),
+  whatEmpty: text('whatEmpty'),
+});
+
+// Halaman indeks Projects, Research, Publications, dan People (translationKey: projects, research, publications, people).
+const pages = textFile('pages', {
+  title: text('title'),
+  lead: opt(z.string().trim().min(1)),
+  emptyTitle: opt(z.string().trim().min(1)),
+  emptyBody: opt(z.string().trim().min(1)),
+}, (d, ctx) => {
+  if (!d.emptyTitle && !d.emptyBody) ctx.addIssue({ code: 'custom', path: ['emptyBody'], message: 'keadaan kosong wajib diisi: isi emptyTitle atau emptyBody' });
+});
+
+// Footer: deskripsi, judul kolom, hak cipta, keterangan, tanggal pembaruan otomatis, dan tautan kode sumber (default mati).
+const footer = textFile('footer', {
+  description: text('description'),
+  exploreTitle: text('exploreTitle'),
+  projectsTitle: text('projectsTitle'),
+  researchTitle: text('researchTitle'),
+  connectTitle: text('connectTitle'),
+  copyrightHolder: text('copyrightHolder'),
+  note: text('note'),
+  showUpdated: z.boolean().default(true),
+  updatedLabel: text('updatedLabel'),
+  showSource: z.boolean().default(false),
+  sourceLabel: text('sourceLabel'),
+  sourceUrl: opt(z.string().url()),
+}, (d, ctx) => {
+  if (d.showSource && !d.sourceUrl) ctx.addIssue({ code: 'custom', path: ['sourceUrl'], message: 'sourceUrl wajib diisi bila showSource menyala' });
+});
+
+export const collections = { research, projects, people, publications, contact, site, home, pages, footer };
