@@ -3,6 +3,7 @@ import { ArrowUp, ExternalLink } from '@lucide/astro';
 import { siteConfig, type Lang } from '../site.config';
 import { useTranslations } from '../i18n/utils';
 import type { UiKey } from '../i18n/ui';
+import BrandMark from './BrandMark.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import LangSwitch from './LangSwitch.astro';
 import { entrySlug, getContact, getFooter, getLocalized, getSite, hrefFor } from '../i18n/content';
@@ -28,7 +29,7 @@ const updated = built.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { da
     <div class="footer__grid">
       <div class="footer__brand">
         <a class="footer__logo" href={to('')} aria-label={siteConfig.logo.alt}>
-          <span class="brand__mark" aria-hidden="true" style={`--mark: url(${base}/${siteConfig.logo.mark})`}></span>
+          <BrandMark height={24} />
           <span class="brand__name">{site.name}</span>
         </a>
         <p>{footer.description}</p>

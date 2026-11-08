@@ -1,5 +1,5 @@
 // Satu-satunya sumber identitas dan warna situs. Ganti nilai di sini, bukan di komponen.
-// Nilai bertanda PLACEHOLDER belum final. Semua warna adalah token, karena logo belum final.
+// Nilai bertanda PLACEHOLDER belum final. Semua warna adalah token.
 
 export type Lang = 'en' | 'id';
 export type ThemeName = 'light' | 'dark';
@@ -39,9 +39,17 @@ export const siteConfig = {
   // Aktif sampai konten final. Menambahkan <meta name="robots" content="noindex, nofollow">.
   noindex: true,
 
-  // Ikon logo di kiri teks wordmark. PLACEHOLDER: ganti dengan logo final. Teks wordmark memakai `name`.
-  logo: { mark: 'placeholder/logo-mark.svg', alt: 'OLYPS' },
-  favicon: 'favicon.svg', // PLACEHOLDER
+  // Logo: tanda OLYPS per tema (terang, gelap) dan versi hitam untuk cetak. Berkas di public/brand/, isinya tidak diubah.
+  // Teks wordmark memakai nama situs dari konten. Favicon dan ikon ada di public/ (favicon.svg, favicon.ico, apple-touch-icon.png).
+  logo: {
+    light: 'brand/olyps-mark-light.svg',
+    dark: 'brand/olyps-mark-dark.svg',
+    black: 'brand/olyps-mark-black.svg',
+    alt: 'OLYPS',
+  },
+  favicon: 'favicon.svg',
+  faviconIco: 'favicon.ico',
+  appleTouchIcon: 'apple-touch-icon.png',
 
   // auto mengikuti prefers-color-scheme. Pilihan manual disimpan di localStorage.
   defaultThemeMode: 'auto' as ThemeMode,

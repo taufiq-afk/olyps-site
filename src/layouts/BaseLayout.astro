@@ -59,6 +59,8 @@ const alternates = isLang(firstSegment)
     <meta name="twitter:image" content={ogImage} />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
     <link rel="icon" href={`${base}/${siteConfig.favicon}`} type="image/svg+xml" />
+    <link rel="icon" href={`${base}/${siteConfig.faviconIco}`} sizes="32x32" />
+    <link rel="apple-touch-icon" href={`${base}/${siteConfig.appleTouchIcon}`} />
     <style set:html={themeCss}></style>
     <ClientRouter />
     <noscript>

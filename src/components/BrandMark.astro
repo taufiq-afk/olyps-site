@@ -1,0 +1,34 @@
+---
+// Logo OLYPS: dua gambar yang bergantian lewat atribut [data-theme] di <html> (diatur skrip inline sebelum render pertama),
+// jadi tidak ada kilatan saat memuat atau saat tema berganti. Versi hitam dipakai saat dicetak.
+// Dekoratif (alt kosong): teks nama situs sudah ada di sebelahnya.
+import { siteConfig } from '../site.config';
+
+interface Props {
+  /** Tinggi dalam px. Lebar mengikuti rasio viewBox logo (1449.84 : 1259.74). */
+  height?: number;
+}
+const { height = 30 } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const width = Math.round((height * 1449.84) / 1259.74);
+const url = (path: string) => `${base}/${path}`;
+---
+<span class="brand-mark" aria-hidden="true" style={`--brand-h:${height}px`}>
+  <picture class="brand-mark__img brand-mark__img--light">
+    <source media="print" srcset={url(siteConfig.logo.black)} />
+    <img src={url(siteConfig.logo.light)} alt="" width={width} height={height} decoding="async" />
+  </picture>
+  <img class="brand-mark__img brand-mark__img--dark" src={url(siteConfig.logo.dark)} alt="" width={width} height={height} decoding="async" />
+</span>
+
+<style is:global>
+  .brand-mark { flex: none; display: inline-flex; align-items: center; height: var(--brand-h); aspect-ratio: 1449.84 / 1259.74; margin-inline-end: 0.125rem; }
+  .brand-mark__img, .brand-mark__img img { display: block; height: 100%; width: auto; aspect-ratio: 1449.84 / 1259.74; }
+  .brand-mark__img--dark { display: none; }
+  [data-theme='dark'] .brand-mark__img--light { display: none; }
+  [data-theme='dark'] .brand-mark__img--dark { display: block; }
+  @media print {
+    .brand-mark__img--dark, [data-theme='dark'] .brand-mark__img--dark { display: none !important; }
+    .brand-mark__img--light, [data-theme='dark'] .brand-mark__img--light { display: block !important; }
+  }
+</style>

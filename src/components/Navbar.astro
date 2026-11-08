@@ -3,6 +3,7 @@ import { Menu, X, FlaskConical, Folder, Users, BookOpen, Mail } from '@lucide/as
 import { siteConfig, type Lang } from '../site.config';
 import { useTranslations } from '../i18n/utils';
 import { getSite } from '../i18n/content';
+import BrandMark from './BrandMark.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import LangSwitch from './LangSwitch.astro';
 
@@ -36,7 +37,7 @@ const menuId = `mobile-menu-${uid}`;
 <header class:list={['navbar', inline && 'navbar--inline']} data-navbar data-base={base} data-glass={glass} data-static={inline ? '' : undefined} transition:persist={inline ? undefined : `navbar-${lang}`}>
   <div class="container navbar__grid">
     <a class="capsule glass brand" href={`${base}/${lang}/`} aria-label={siteConfig.logo.alt}>
-      <span class="brand__mark" aria-hidden="true" style={`--mark: url(${base}/${siteConfig.logo.mark})`}></span>
+      <BrandMark height={30} />
       <span class="brand__name">{site.name}</span>
     </a>
 
@@ -86,11 +87,6 @@ const menuId = `mobile-menu-${uid}`;
   .capsule { pointer-events: auto; height: var(--capsule-h); border-radius: var(--radius-pill); display: flex; align-items: center; }
 
   .brand { justify-self: start; gap: var(--space-2); padding: 0 var(--space-5); color: var(--text); text-decoration: none; }
-  .brand__mark {
-    flex: none; width: 1.5rem; height: 1.5rem; background-color: var(--accent);
-    -webkit-mask: var(--mark) no-repeat center / contain; mask: var(--mark) no-repeat center / contain;
-    transition: background-color 320ms var(--ease);
-  }
   .brand__name { font-weight: 700; letter-spacing: 0.12em; line-height: 1; }
 
   .nav-links { position: relative; padding: 4px; gap: 2px; }
