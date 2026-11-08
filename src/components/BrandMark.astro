@@ -5,12 +5,12 @@
 import { siteConfig } from '../site.config';
 
 interface Props {
-  /** Tinggi dalam px. Lebar mengikuti rasio viewBox logo (1449.84 : 1259.74). */
+  /** Tinggi dalam px. Lebar mengikuti rasio viewBox logo (1443.84 : 1254.37). */
   height?: number;
 }
 const { height = 30 } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const width = Math.round((height * 1449.84) / 1259.74);
+const width = Math.round((height * 1443.84) / 1254.37);
 const url = (path: string) => `${base}/${path}`;
 ---
 <span class="brand-mark" aria-hidden="true" style={`--brand-h:${height}px`}>
@@ -22,8 +22,8 @@ const url = (path: string) => `${base}/${path}`;
 </span>
 
 <style is:global>
-  .brand-mark { flex: none; display: inline-flex; align-items: center; height: var(--brand-h); aspect-ratio: 1449.84 / 1259.74; margin-inline-end: 0.125rem; }
-  .brand-mark__img, .brand-mark__img img { display: block; height: 100%; width: auto; aspect-ratio: 1449.84 / 1259.74; }
+  .brand-mark { flex: none; display: inline-flex; align-items: center; height: var(--brand-h); aspect-ratio: 1443.84 / 1254.37; margin-inline-end: 0.125rem; }
+  .brand-mark__img, .brand-mark__img img { display: block; height: 100%; width: auto; aspect-ratio: 1443.84 / 1254.37; }
   .brand-mark__img--dark { display: none; }
   [data-theme='dark'] .brand-mark__img--light { display: none; }
   [data-theme='dark'] .brand-mark__img--dark { display: block; }
