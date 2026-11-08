@@ -35,10 +35,6 @@ private/
 *.m4v
 
 # Hanya klip yang sengaja dipublikasikan, dikecualikan per nama berkas (bukan per ekstensi)
-!public/media/olyps-hero-loop.mp4
-!public/media/olyps-hero-loop.webm
-!public/media/olyps-hero-loop-light.mp4
-!public/media/olyps-hero-loop-light.webm
 # Klip hero lab (video terang dan gelap), dikecualikan per nama berkas agar ikut ter-commit dan terbangun di GitHub Actions
 !public/media/hero-lab-light.mp4
 !public/media/hero-lab-light.webm
