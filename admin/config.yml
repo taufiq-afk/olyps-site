@@ -11,14 +11,17 @@ i18n:
   structure: multiple_folders
   locales: [en, id]
   default_locale: en
+  # Semua bahasa aktif saat membuat entri baru, supaya EN dan ID selalu dibuat berpasangan.
+  initial_locales: all
 
 # Unggahan masuk src/assets/<jenis>/ (people, research, projects), diproses Astro, bukan public/. Folder diatur per koleksi di bawah.
+# Folder global (koleksi tanpa folder sendiri) adalah src/assets/shared, tidak menimpa folder People.
 # Batas: 1.500.000 byte per berkas (sama dengan maxFileBytes di scripts/predeploy.config.json).
 # Admin mengecilkan ke webp maksimum 1920 px. Setelah menyimpan, integrations/dev-admin.mjs menjalankan scripts/tidy-assets.mjs
 # (atau manual: npm run tidy:assets): nama berkas menjadi slug entri (mis. taufiq.webp), people maksimum 1024 px,
 # research dan projects 1920 px, tanpa EXIF atau GPS.
-media_folder: /src/assets/people
-public_folder: /src/assets/people
+media_folder: /src/assets/shared
+public_folder: /src/assets/shared
 media_libraries:
   default:
     config:
@@ -31,7 +34,8 @@ media_libraries:
           width: 1920
           height: 1920
 
-# Menu admin mengikuti situs: Home, Projects, Research, Publications, People, Page titles and intros, Contact, Footer and Global, lalu tab Assets bawaan Sveltia.
+# Menu admin: Home, Page intros, Footer and site info | Projects, Research, Publications, People | Contact, lalu tab Assets bawaan Sveltia.
+# Pemisah (divider) Sveltia hanya garis tanpa judul, jadi pengelompokan memakai garis, bukan label grup.
 # Urutan field di tiap formulir mengikuti urutan tampil di halaman, field penerbitan di bagian bawah. Setiap field punya petunjuk.
 collections:
   - name: home
@@ -169,6 +173,310 @@ collections:
               display_fields:
                 - title
         i18n: false
+  - name: pages
+    label: Page intros
+    i18n: true
+    files:
+      - name: projects
+        label: Projects page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/projects.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "projects" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: research
+        label: Research page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/research.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "research" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: publications
+        label: Publications page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/publications.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "publications" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: people
+        label: People page
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/pages/{{locale}}/people.md
+        fields:
+          - name: title
+            label: Page title
+            widget: string
+            i18n: true
+            hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: lead
+            label: Introduction
+            widget: text
+            i18n: true
+            hint: Optional sentence under the title. Leave empty for none.
+            required: false
+          - name: emptyTitle
+            label: "Empty state: heading"
+            widget: string
+            i18n: true
+            hint: Optional heading shown while the page has no entries. Fill this or the text below.
+            required: false
+          - name: emptyBody
+            label: "Empty state: text"
+            widget: text
+            i18n: true
+            hint: Optional text shown while the page has no entries. Fill this or the heading above.
+            required: false
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "people" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+  - name: footer_global
+    label: Footer and site info
+    i18n: true
+    files:
+      - name: footer
+        label: Footer
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/footer/{{locale}}/footer.md
+        fields:
+          - name: description
+            label: Description
+            widget: text
+            i18n: true
+            hint: Short text next to the logo.
+          - name: exploreTitle
+            label: "Column: Explore title"
+            widget: string
+            i18n: true
+            hint: Heading of the first column (links to all pages).
+          - name: projectsTitle
+            label: "Column: Projects title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with up to 3 projects, in display order.
+          - name: researchTitle
+            label: "Column: Research title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with up to 3 research entries, in display order.
+          - name: connectTitle
+            label: "Column: Connect title"
+            widget: string
+            i18n: true
+            hint: Heading of the column with the links from the Contact page.
+          - name: note
+            label: Concept note
+            widget: text
+            i18n: true
+            hint: Line above the bottom row about concepts and assumptions.
+          - name: copyrightHolder
+            label: Copyright holder
+            widget: string
+            i18n: true
+            hint: Shown as "© {year} {holder}". The year is the build year.
+          - name: showUpdated
+            label: Show last updated
+            widget: boolean
+            default: true
+            i18n: duplicate
+            hint: "On: shows the date of the latest build automatically."
+          - name: updatedLabel
+            label: Last updated label
+            widget: string
+            i18n: true
+            hint: Text before the build date, for example "Last updated".
+          - name: showSource
+            label: Show source code link
+            widget: boolean
+            default: false
+            i18n: duplicate
+            hint: "Off by default. On: shows a link to the repository below."
+          - name: sourceLabel
+            label: Source code label
+            widget: string
+            i18n: true
+            hint: Link text, for example "Source code".
+          - name: sourceUrl
+            label: Source code URL
+            widget: string
+            required: false
+            i18n: duplicate
+            pattern:
+              - ^https?://\S+$
+              - Use a full URL starting with https://
+            hint: Required when the source code link is on. Opens in a new tab.
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "footer" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+      - name: site
+        label: Global
+        i18n: true
+        format: yaml-frontmatter
+        extension: md
+        file: src/content/site/{{locale}}/site.md
+        fields:
+          - name: name
+            label: Site name
+            widget: string
+            i18n: true
+            hint: Wordmark in the header and footer, and in page titles.
+          - name: navProjects
+            label: "Menu: Projects"
+            widget: string
+            i18n: true
+            hint: Label of the Projects link in the menu and footer.
+          - name: navResearch
+            label: "Menu: Research"
+            widget: string
+            i18n: true
+            hint: Label of the Research link.
+          - name: navPublications
+            label: "Menu: Publications"
+            widget: string
+            i18n: true
+            hint: Label of the Publications link.
+          - name: navPeople
+            label: "Menu: People"
+            widget: string
+            i18n: true
+            hint: Label of the People link.
+          - name: navContact
+            label: "Menu: Contact"
+            widget: string
+            i18n: true
+            hint: Label of the Contact link. Also the title of the Contact page.
+          - name: description
+            label: Meta description
+            widget: text
+            i18n: true
+            hint: Description for search results and link previews. Not visible on the page.
+          - name: translationKey
+            label: Translation key
+            widget: string
+            i18n: duplicate
+            hint: Keep as "site" in both languages.
+          - name: lang
+            label: Language
+            widget: hidden
+            default: "{{locale}}"
+            i18n: true
+  - divider: true
   - name: projects
     label: Projects
     label_singular: Project
@@ -774,170 +1082,7 @@ collections:
         widget: hidden
         default: "{{locale}}"
         i18n: true
-  - name: pages
-    label: Page titles and intros
-    i18n: true
-    files:
-      - name: projects
-        label: Projects page
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/pages/{{locale}}/projects.md
-        fields:
-          - name: title
-            label: Page title
-            widget: string
-            i18n: true
-            hint: Heading of the page. The menu label is set separately under Footer and Global.
-          - name: lead
-            label: Introduction
-            widget: text
-            i18n: true
-            hint: Optional sentence under the title. Leave empty for none.
-            required: false
-          - name: emptyTitle
-            label: "Empty state: heading"
-            widget: string
-            i18n: true
-            hint: Optional heading shown while the page has no entries. Fill this or the text below.
-            required: false
-          - name: emptyBody
-            label: "Empty state: text"
-            widget: text
-            i18n: true
-            hint: Optional text shown while the page has no entries. Fill this or the heading above.
-            required: false
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "projects" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true
-      - name: research
-        label: Research page
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/pages/{{locale}}/research.md
-        fields:
-          - name: title
-            label: Page title
-            widget: string
-            i18n: true
-            hint: Heading of the page. The menu label is set separately under Footer and Global.
-          - name: lead
-            label: Introduction
-            widget: text
-            i18n: true
-            hint: Optional sentence under the title. Leave empty for none.
-            required: false
-          - name: emptyTitle
-            label: "Empty state: heading"
-            widget: string
-            i18n: true
-            hint: Optional heading shown while the page has no entries. Fill this or the text below.
-            required: false
-          - name: emptyBody
-            label: "Empty state: text"
-            widget: text
-            i18n: true
-            hint: Optional text shown while the page has no entries. Fill this or the heading above.
-            required: false
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "research" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true
-      - name: publications
-        label: Publications page
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/pages/{{locale}}/publications.md
-        fields:
-          - name: title
-            label: Page title
-            widget: string
-            i18n: true
-            hint: Heading of the page. The menu label is set separately under Footer and Global.
-          - name: lead
-            label: Introduction
-            widget: text
-            i18n: true
-            hint: Optional sentence under the title. Leave empty for none.
-            required: false
-          - name: emptyTitle
-            label: "Empty state: heading"
-            widget: string
-            i18n: true
-            hint: Optional heading shown while the page has no entries. Fill this or the text below.
-            required: false
-          - name: emptyBody
-            label: "Empty state: text"
-            widget: text
-            i18n: true
-            hint: Optional text shown while the page has no entries. Fill this or the heading above.
-            required: false
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "publications" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true
-      - name: people
-        label: People page
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/pages/{{locale}}/people.md
-        fields:
-          - name: title
-            label: Page title
-            widget: string
-            i18n: true
-            hint: Heading of the page. The menu label is set separately under Footer and Global.
-          - name: lead
-            label: Introduction
-            widget: text
-            i18n: true
-            hint: Optional sentence under the title. Leave empty for none.
-            required: false
-          - name: emptyTitle
-            label: "Empty state: heading"
-            widget: string
-            i18n: true
-            hint: Optional heading shown while the page has no entries. Fill this or the text below.
-            required: false
-          - name: emptyBody
-            label: "Empty state: text"
-            widget: text
-            i18n: true
-            hint: Optional text shown while the page has no entries. Fill this or the heading above.
-            required: false
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "people" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true
+  - divider: true
   - name: contact
     label: Contact
     label_singular: Contact page
@@ -998,142 +1143,3 @@ collections:
         widget: hidden
         default: "{{locale}}"
         i18n: true
-  - name: footer_global
-    label: Footer and Global
-    i18n: true
-    files:
-      - name: footer
-        label: Footer
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/footer/{{locale}}/footer.md
-        fields:
-          - name: description
-            label: Description
-            widget: text
-            i18n: true
-            hint: Short text next to the logo.
-          - name: exploreTitle
-            label: "Column: Explore title"
-            widget: string
-            i18n: true
-            hint: Heading of the first column (links to all pages).
-          - name: projectsTitle
-            label: "Column: Projects title"
-            widget: string
-            i18n: true
-            hint: Heading of the column with up to 3 projects, in display order.
-          - name: researchTitle
-            label: "Column: Research title"
-            widget: string
-            i18n: true
-            hint: Heading of the column with up to 3 research entries, in display order.
-          - name: connectTitle
-            label: "Column: Connect title"
-            widget: string
-            i18n: true
-            hint: Heading of the column with the links from the Contact page.
-          - name: note
-            label: Concept note
-            widget: text
-            i18n: true
-            hint: Line above the bottom row about concepts and assumptions.
-          - name: copyrightHolder
-            label: Copyright holder
-            widget: string
-            i18n: true
-            hint: Shown as "© {year} {holder}". The year is the build year.
-          - name: showUpdated
-            label: Show last updated
-            widget: boolean
-            default: true
-            i18n: duplicate
-            hint: "On: shows the date of the latest build automatically."
-          - name: updatedLabel
-            label: Last updated label
-            widget: string
-            i18n: true
-            hint: Text before the build date, for example "Last updated".
-          - name: showSource
-            label: Show source code link
-            widget: boolean
-            default: false
-            i18n: duplicate
-            hint: "Off by default. On: shows a link to the repository below."
-          - name: sourceLabel
-            label: Source code label
-            widget: string
-            i18n: true
-            hint: Link text, for example "Source code".
-          - name: sourceUrl
-            label: Source code URL
-            widget: string
-            required: false
-            i18n: duplicate
-            pattern:
-              - ^https?://\S+$
-              - Use a full URL starting with https://
-            hint: Required when the source code link is on. Opens in a new tab.
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "footer" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true
-      - name: site
-        label: Global
-        i18n: true
-        format: yaml-frontmatter
-        extension: md
-        file: src/content/site/{{locale}}/site.md
-        fields:
-          - name: name
-            label: Site name
-            widget: string
-            i18n: true
-            hint: Wordmark in the header and footer, and in page titles.
-          - name: navProjects
-            label: "Menu: Projects"
-            widget: string
-            i18n: true
-            hint: Label of the Projects link in the menu and footer.
-          - name: navResearch
-            label: "Menu: Research"
-            widget: string
-            i18n: true
-            hint: Label of the Research link.
-          - name: navPublications
-            label: "Menu: Publications"
-            widget: string
-            i18n: true
-            hint: Label of the Publications link.
-          - name: navPeople
-            label: "Menu: People"
-            widget: string
-            i18n: true
-            hint: Label of the People link.
-          - name: navContact
-            label: "Menu: Contact"
-            widget: string
-            i18n: true
-            hint: Label of the Contact link. Also the title of the Contact page.
-          - name: description
-            label: Meta description
-            widget: text
-            i18n: true
-            hint: Description for search results and link previews. Not visible on the page.
-          - name: translationKey
-            label: Translation key
-            widget: string
-            i18n: duplicate
-            hint: Keep as "site" in both languages.
-          - name: lang
-            label: Language
-            widget: hidden
-            default: "{{locale}}"
-            i18n: true

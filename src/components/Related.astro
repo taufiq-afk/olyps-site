@@ -2,23 +2,26 @@
 import type { Lang } from '../site.config';
 import type { RelatedItem } from '../i18n/content';
 import { useTranslations } from '../i18n/utils';
-import type { UiKey } from '../i18n/ui';
+import { getNavLabel } from '../i18n/content';
 
 interface Props {
   lang: Lang;
   items: RelatedItem[];
   /** Versi ringkas untuk kartu dan baris di halaman indeks. */
   compact?: boolean;
+  /** Hanya daftar chip, tanpa judul (judul sudah ada di kartu meta). */
+  bare?: boolean;
 }
-const { lang, items, compact = false } = Astro.props;
+const { lang, items, compact = false, bare = false } = Astro.props;
 const t = useTranslations(lang);
+const kindLabel = Object.fromEntries(await Promise.all((['projects', 'research', 'publications', 'people'] as const).map(async (k) => [k, await getNavLabel(k, lang)])));
 ---
 {items.length > 0 && (
-  <section class:list={['related', compact && 'related--compact']} aria-label={t('related.title')}>
-    {compact ? <p class="related__label">{t('related.title')}</p> : <h2 class="related__title">{t('related.title')}</h2>}
+  <section class:list={['related', compact && 'related--compact', bare && 'related--bare']} aria-label={t('related.title')}>
+    {bare ? null : compact ? <p class="related__label">{t('related.title')}</p> : <h2 class="related__title">{t('related.title')}</h2>}
     <ul>
       {items.map((item) => (
-        <li><a class="chip" href={item.href}><span class="chip__kind">{t(`nav.${item.kind}` as UiKey)}</span>{item.title}</a></li>
+        <li><a class="chip" href={item.href}><span class="chip__kind">{kindLabel[item.kind]}</span>{item.title}</a></li>
       ))}
     </ul>
   </section>
@@ -26,6 +29,7 @@ const t = useTranslations(lang);
 
 <style is:global>
   .related { margin-top: var(--space-6); }
+  .related--bare { margin-top: 0; }
   .related--compact { margin-top: auto; padding-top: var(--space-3); width: 100%; }
   .related__title { font-size: var(--text-lead); margin-bottom: var(--space-3); }
   .related__label { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }

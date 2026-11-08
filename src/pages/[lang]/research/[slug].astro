@@ -1,10 +1,7 @@
 ---
 import { render } from 'astro:content';
-import { ArrowLeft } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
-import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
-import Timeline from '../../../components/Timeline.astro';
-import Related from '../../../components/Related.astro';
+import DetailPage from '../../../components/DetailPage.astro';
 import { entrySlug, getLocalized, getRelated } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
 import { siteLangs, type Lang } from '../../../site.config';
@@ -25,28 +22,26 @@ const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const { Content } = await render(entry);
 const all = await getRelated('research', entry.data.translationKey, lang);
-// Orang yang terkait ditampilkan sebagai penulis, sisanya sebagai bagian "Related".
+// Orang yang terkait tampil sebagai penulis, sisanya sebagai item terkait.
 const authors = all.filter((r) => r.kind === 'people');
 const related = all.filter((r) => r.kind !== 'people');
 ---
 <PageShell lang={lang} current="research" title={entry.data.title} banner="50% 14%">
-  <a class="back-link" href={`${base}/${lang}/research/`}><ArrowLeft size={18} aria-hidden="true" />{t('research.back')}</a>
-  <article class="detail detail--single">
-    <div class="detail__meta">
-      {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
-    </div>
-    {authors.length > 0 && (
-      <p class="detail__by">{t('research.by')} {authors.map((a, i) => <Fragment>{i > 0 && ', '}<a href={a.href}>{a.title}</a></Fragment>)}</p>
-    )}
-    <p class="detail__summary">{entry.data.summary}</p>
-    <Timeline lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} leadsTo={entry.data.leadsTo} leadsToUrl={entry.data.leadsToUrl} />
-    <div class="prose"><Content /></div>
-    <Related lang={lang} items={related} />
-  </article>
+  <DetailPage
+    lang={lang}
+    backHref={`${base}/${lang}/research/`}
+    backLabel={t('research.back')}
+    summary={entry.data.summary}
+    placeholder={entry.data.placeholder}
+    status={entry.data.status}
+    startDate={entry.data.startDate}
+    endDate={entry.data.endDate}
+    leadsTo={entry.data.leadsTo}
+    leadsToUrl={entry.data.leadsToUrl}
+    people={authors}
+    peopleLabel={t('research.by')}
+    related={related}
+  >
+    <Content />
+  </DetailPage>
 </PageShell>
-
-<style is:global>
-  .detail--single { max-width: 52rem; }
-  .detail__by { margin-bottom: var(--space-3); color: var(--text-muted); }
-  .detail__by a { color: var(--accent); }
-</style>

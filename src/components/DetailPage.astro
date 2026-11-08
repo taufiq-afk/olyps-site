@@ -1,0 +1,79 @@
+---
+// Tata letak seragam halaman detail Research dan Projects.
+// Kolom kiri: ringkasan dan bagian-bagian isi. Kolom kanan: media (bila ada) lalu kartu meta
+// (Timeline, penulis atau anggota, item terkait). Di layar sempit kolom kanan turun di bawah isi.
+import { ArrowLeft } from '@lucide/astro';
+import type { Lang } from '../site.config';
+import { useTranslations } from '../i18n/utils';
+import type { RelatedItem } from '../i18n/content';
+import PlaceholderBadge from './PlaceholderBadge.astro';
+import Timeline from './Timeline.astro';
+import Related from './Related.astro';
+
+interface Props {
+  lang: Lang;
+  backHref: string;
+  backLabel: string;
+  summary: string;
+  placeholder: boolean;
+  status: string;
+  startDate?: string;
+  endDate?: string;
+  leadsTo?: string[];
+  leadsToUrl?: string;
+  /** Orang yang terkait: penulis (Research) atau anggota (Projects). */
+  people: RelatedItem[];
+  peopleLabel: string;
+  related: RelatedItem[];
+}
+const { lang, backHref, backLabel, summary, placeholder, status, startDate, endDate, leadsTo, leadsToUrl, people, peopleLabel, related } = Astro.props;
+const t = useTranslations(lang);
+---
+<a class="back-link" href={backHref}><ArrowLeft size={18} aria-hidden="true" />{backLabel}</a>
+<div class="detail">
+  <article class="detail__main">
+    {placeholder && <p class="detail__badge"><PlaceholderBadge lang={lang} /></p>}
+    <p class="detail__summary">{summary}</p>
+    <div class="prose"><slot /></div>
+  </article>
+  <aside class="detail__aside">
+    <slot name="media" />
+    <div class="meta-card">
+      <Timeline lang={lang} status={status} startDate={startDate} endDate={endDate} leadsTo={leadsTo} leadsToUrl={leadsToUrl} />
+      {people.length > 0 && (
+        <section class="meta-block">
+          <h2 class="meta-block__title">{peopleLabel}</h2>
+          <ul class="meta-links">
+            {people.map((p) => <li><a href={p.href}>{p.title}</a></li>)}
+          </ul>
+        </section>
+      )}
+      {related.length > 0 && (
+        <section class="meta-block">
+          <h2 class="meta-block__title">{t('related.title')}</h2>
+          <Related lang={lang} items={related} bare />
+        </section>
+      )}
+    </div>
+  </aside>
+</div>
+
+<style is:global>
+  .detail { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 56rem) {
+    .detail { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+    .detail__aside { position: sticky; top: calc(var(--capsule-h) + var(--space-6)); }
+  }
+  .detail__badge { margin-bottom: var(--space-4); }
+  .detail__summary { font-size: var(--text-lead); max-width: var(--measure); margin: 0 0 var(--space-6); }
+  .prose { max-width: var(--measure); }
+  .prose > :first-child { margin-top: 0; }
+  .prose h2 { font-size: var(--text-section); margin: var(--space-6) 0 var(--space-2); }
+  .prose p { color: var(--text-muted); margin: 0 0 var(--space-3); }
+  .detail__aside { display: grid; gap: var(--space-5); }
+  .meta-card { display: grid; gap: var(--space-5); padding: var(--space-5); background: var(--raised); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-sm); }
+  .meta-block__title { font-size: var(--text-small); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }
+  .meta-block + .meta-block { padding-top: var(--space-5); border-top: 1px solid var(--border); }
+  .meta-links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+  .meta-links a { color: var(--accent); }
+</style>

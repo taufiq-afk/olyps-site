@@ -14,3 +14,8 @@ const parts = [
 ].filter(Boolean);
 ---
 <span class="badge badge--accent status-line">{parts.join(', ')}</span>
+
+<style is:global>
+  /* Baris ringkas boleh membungkus di kartu sempit tanpa menjadi pil yang aneh. */
+  .status-line { border-radius: 14px; padding-block: 0.2rem; line-height: 1.3; text-align: start; white-space: normal; }
+</style>

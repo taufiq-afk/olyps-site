@@ -1,6 +1,7 @@
 ---
+import { Folder } from '@lucide/astro';
 import StatusLine from '../StatusLine.astro';
-import { ArrowUpRight, Folder } from '@lucide/astro';
+import Card from '../Card.astro';
 import type { Lang } from '../../site.config';
 import { entrySlug, getHome } from '../../i18n/content';
 import PlaceholderBadge from '../PlaceholderBadge.astro';
@@ -8,7 +9,7 @@ import PlaceholderBadge from '../PlaceholderBadge.astro';
 interface Props {
   lang: Lang;
   /** Proyek unggulan dari src/data/featured.json, placeholder sudah disaring pada build produksi. */
-  projects: { id: string; data: { title: string; summary: string; status: string; placeholder: boolean } }[];
+  projects: { id: string; data: { title: string; summary: string; status: string; startDate?: string; endDate?: string; placeholder: boolean } }[];
 }
 const { lang, projects } = Astro.props;
 const home = await getHome(lang);
@@ -20,16 +21,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     {projects.length === 0 ? (
       <p class="what__empty reveal">{home.whatEmpty}</p>
     ) : (
-      <div class="areas">
+      <div class="entry-grid">
         {projects.map((project, i) => (
-          <a class="card card--lg card--link reveal" data-glow data-reveal={i % 2 === 0 ? 'left' : 'right'} style={`--i:${i}`} href={`${base}/${lang}/projects/${entrySlug(project.id)}/`}>
-            <span class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
-            <h3>{project.data.title}</h3>
-            <StatusLine lang={lang} status={project.data.status} startDate={project.data.startDate} endDate={project.data.endDate} />
-            <p>{project.data.summary}</p>
-            {project.data.placeholder && <PlaceholderBadge lang={lang} />}
-            <ArrowUpRight class="card__arrow" size={22} aria-hidden="true" />
-          </a>
+          <Card class="reveal" data-reveal={i % 2 === 0 ? 'left' : 'right'} style={`--i:${i}`} href={`${base}/${lang}/projects/${entrySlug(project.id)}/`} title={project.data.title} summary={project.data.summary}>
+            <span slot="media" class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
+            <Fragment slot="meta">
+              <StatusLine lang={lang} status={project.data.status} startDate={project.data.startDate} endDate={project.data.endDate} />
+              {project.data.placeholder && <PlaceholderBadge lang={lang} />}
+            </Fragment>
+          </Card>
         ))}
       </div>
     )}
@@ -37,9 +37,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 </section>
 
 <style>
-  .areas { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
-  .card h3 { font-size: var(--text-lead); }
-  .card p { color: var(--text-muted); }
   /* Keadaan kosong ringkas: satu baris, tanpa kartu. */
   .what__empty { color: var(--text-muted); max-width: var(--measure); }
 </style>

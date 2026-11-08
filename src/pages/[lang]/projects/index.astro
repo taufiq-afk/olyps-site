@@ -1,11 +1,10 @@
 ---
-import StatusLine from '../../../components/StatusLine.astro';
-import { ArrowUpRight, Folder } from '@lucide/astro';
+import { Folder } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
+import StatusLine from '../../../components/StatusLine.astro';
+import Card from '../../../components/Card.astro';
 import { entrySlug, getLocalized, getPage } from '../../../i18n/content';
-import { useTranslations } from '../../../i18n/utils';
-import type { UiKey } from '../../../i18n/ui';
 import { siteLangs, type Lang } from '../../../site.config';
 
 export function getStaticPaths() {
@@ -13,7 +12,6 @@ export function getStaticPaths() {
 }
 
 const lang = Astro.params.lang as Lang;
-const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const items = await getLocalized('projects', lang);
 const page = await getPage('projects', lang);
@@ -22,16 +20,15 @@ const page = await getPage('projects', lang);
   {items.length === 0 ? (
     <div class="card empty">{page.emptyTitle && <h2>{page.emptyTitle}</h2>}{page.emptyBody && <p>{page.emptyBody}</p>}</div>
   ) : (
-    <div class="card-grid">
+    <div class="entry-grid">
       {items.map((entry) => (
-        <a class="card card--md card--link" data-glow href={`${base}/${lang}/projects/${entrySlug(entry.id)}/`}>
-          <span class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
-          <h2>{entry.data.title}</h2>
-          <StatusLine lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} />
-          <p>{entry.data.summary}</p>
-          {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
-          <ArrowUpRight class="card__arrow" size={22} aria-hidden="true" />
-        </a>
+        <Card href={`${base}/${lang}/projects/${entrySlug(entry.id)}/`} title={entry.data.title} summary={entry.data.summary}>
+          <span slot="media" class="icon-tile"><Folder size={26} aria-hidden="true" /></span>
+          <Fragment slot="meta">
+            <StatusLine lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} />
+            {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
+          </Fragment>
+        </Card>
       ))}
     </div>
   )}

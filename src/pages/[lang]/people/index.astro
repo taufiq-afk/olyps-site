@@ -1,6 +1,7 @@
 ---
 import PageShell from '../../../components/PageShell.astro';
 import Avatar from '../../../components/Avatar.astro';
+import Card from '../../../components/Card.astro';
 import { entrySlug, getLocalized, getPage } from '../../../i18n/content';
 import { useTranslations } from '../../../i18n/utils';
 import { siteLangs, type Lang } from '../../../site.config';
@@ -20,22 +21,17 @@ const page = await getPage('people', lang);
   {people.length === 0 ? (
     <div class="card">{page.emptyTitle && <h2>{page.emptyTitle}</h2>}{page.emptyBody && <p>{page.emptyBody}</p>}</div>
   ) : (
-    <div class="people-grid">
+    <div class="entry-grid">
       {people.map((person) => (
-        <a class="card card--sm card--link person" data-glow href={`${base}/${lang}/people/${entrySlug(person.id)}/`}>
-          <Avatar name={person.data.name} photo={person.data.photo} />
-          <h2>{person.data.name}</h2>
-          <p class="person__role">{person.data.role}</p>
-        </a>
+        <Card href={`${base}/${lang}/people/${entrySlug(person.id)}/`} title={person.data.name}>
+          <Avatar slot="media" name={person.data.name} photo={person.data.photo} />
+          <p slot="meta" class="entry-card__role">{person.data.role}</p>
+        </Card>
       ))}
     </div>
   )}
 </PageShell>
 
 <style is:global>
-  /* Auto-fill: 5 sampai 6 kolom pada lebar container maksimum. */
-  .people-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); }
-  .person { align-items: flex-start; }
-  .person h2 { font-size: 1.05rem; line-height: 1.25; }
-  .person__role { font-size: var(--text-small); }
+  .entry-card__role { margin: 0; font-size: var(--text-small); color: var(--text-muted); }
 </style>

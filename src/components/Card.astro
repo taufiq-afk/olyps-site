@@ -1,0 +1,63 @@
+---
+// Kartu entri seragam untuk Projects, Research, People, dan "What we work on" di Home.
+// Seluruh area kartu bisa diklik lewat tautan judul yang diregangkan (stretched link, tanpa tautan bersarang).
+import { ArrowUpRight } from '@lucide/astro';
+
+interface Props {
+  href: string;
+  title: string;
+  /** Ringkasan, dipotong maksimum 4 baris di kartu (penuh di halaman detail). */
+  summary?: string;
+  [attr: string]: unknown;
+}
+const { href, title, summary, class: className, ...rest } = Astro.props;
+---
+<article class:list={['entry-card', className as string | undefined]} data-glow {...rest}>
+  {Astro.slots.has('media') && <div class="entry-card__media"><slot name="media" /></div>}
+  <h2 class="entry-card__title"><a class="entry-card__link" href={href}>{title}</a></h2>
+  {Astro.slots.has('meta') && <div class="entry-card__meta"><slot name="meta" /></div>}
+  {summary && <p class="entry-card__summary">{summary}</p>}
+  <ArrowUpRight class="entry-card__arrow" size={22} aria-hidden="true" />
+</article>
+
+<style is:global>
+  /* Grid kartu: 1 kolom di bawah 600px, 2 kolom dari 600px, 3 dari 900px, 4 dari 1200px.
+     Lebar kartu dibatasi (--entry-w) sehingga satu kartu tidak melebar mengisi baris. */
+  .entry-grid { --entry-w: 20rem; display: grid; gap: var(--space-5); justify-content: start; grid-template-columns: minmax(0, 24rem); }
+  @media (min-width: 600px) { .entry-grid { grid-template-columns: repeat(2, minmax(0, var(--entry-w))); } }
+  @media (min-width: 900px) { .entry-grid { grid-template-columns: repeat(3, minmax(0, var(--entry-w))); } }
+  @media (min-width: 1200px) { .entry-grid { grid-template-columns: repeat(4, minmax(0, var(--entry-w))); } }
+
+  .entry-card {
+    position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
+    padding: var(--card-pad-md); min-height: var(--card-h-md);
+    background: var(--raised); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-sm);
+    color: var(--text);
+    transition: transform 280ms var(--ease), box-shadow 280ms var(--ease), border-color 280ms var(--ease);
+  }
+  /* Kilau di belakang isi kartu. Isi kartu tidak diberi position agar tautan judul meregang ke seluruh kartu. */
+  .entry-card[data-glow]::before { z-index: -1; }
+  .entry-card[data-glow] > * { position: static; }
+  .entry-card:hover, .entry-card:has(:focus-visible) {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.08), 0 22px 44px rgb(0 0 0 / 0.16);
+  }
+  .entry-card:has(:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .entry-card__link { color: inherit; text-decoration: none; outline: none; }
+  .entry-card__link::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .entry-card__title { font-size: var(--text-lead); line-height: 1.2; overflow-wrap: anywhere; }
+  .entry-card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .entry-card__summary {
+    margin: 0; color: var(--text-muted);
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden;
+  }
+  .entry-card__arrow { margin-top: auto; align-self: flex-end; color: var(--text-muted); transition: transform 280ms var(--ease), color 280ms var(--ease); }
+  .entry-card:hover .entry-card__arrow, .entry-card:has(:focus-visible) .entry-card__arrow { transform: translate(2px, -2px); color: var(--accent); }
+  /* Avatar di kartu People lebih besar agar proporsional dengan kartu. */
+  .entry-card .avatar { width: 5.5rem; height: 5.5rem; font-size: 1.75rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .entry-card, .entry-card__arrow { transition: none; }
+    .entry-card:hover, .entry-card:has(:focus-visible), .entry-card:hover .entry-card__arrow, .entry-card:has(:focus-visible) .entry-card__arrow { transform: none; }
+  }
+</style>

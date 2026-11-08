@@ -1,12 +1,10 @@
 ---
-import StatusLine from '../../../components/StatusLine.astro';
-import { ArrowUpRight, FlaskConical } from '@lucide/astro';
+import { FlaskConical } from '@lucide/astro';
 import PageShell from '../../../components/PageShell.astro';
 import PlaceholderBadge from '../../../components/PlaceholderBadge.astro';
-import Related from '../../../components/Related.astro';
-import { entrySlug, getLocalized, getPage, getRelated } from '../../../i18n/content';
-import { useTranslations } from '../../../i18n/utils';
-import type { UiKey } from '../../../i18n/ui';
+import StatusLine from '../../../components/StatusLine.astro';
+import Card from '../../../components/Card.astro';
+import { entrySlug, getLocalized, getPage } from '../../../i18n/content';
 import { siteLangs, type Lang } from '../../../site.config';
 
 export function getStaticPaths() {
@@ -14,40 +12,28 @@ export function getStaticPaths() {
 }
 
 const lang = Astro.params.lang as Lang;
-const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const entries = await getLocalized('research', lang);
 const page = await getPage('research', lang);
-// Tautan ke orang ditampilkan di halaman detail, jadi chip di kartu hanya untuk entri lain.
-const items = await Promise.all(entries.map(async (entry) => ({
-  entry,
-  related: (await getRelated('research', entry.data.translationKey, lang)).filter((r) => r.kind !== 'people'),
-})));
 ---
 <PageShell lang={lang} current="research" title={page.title} lead={page.lead} banner="50% 14%">
-  {items.length === 0 ? (
+  {entries.length === 0 ? (
     <div class="card empty">{page.emptyTitle && <h2>{page.emptyTitle}</h2>}{page.emptyBody && <p>{page.emptyBody}</p>}</div>
   ) : (
-    <div class="card-grid">
-      {items.map(({ entry, related }) => (
-        <article class="card card--md research-card" id={entrySlug(entry.id)}>
-          <span class="icon-tile"><FlaskConical size={26} aria-hidden="true" /></span>
-          <h2><a class="research-card__link" href={`${base}/${lang}/research/${entrySlug(entry.id)}/`}>{entry.data.title}</a></h2>
-          <StatusLine lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} />
-          <p>{entry.data.summary}</p>
-          {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
-          <Related lang={lang} items={related} compact />
-          <ArrowUpRight class="research-card__arrow" size={22} aria-hidden="true" />
-        </article>
+    <div class="entry-grid">
+      {entries.map((entry) => (
+        <Card id={entrySlug(entry.id)} href={`${base}/${lang}/research/${entrySlug(entry.id)}/`} title={entry.data.title} summary={entry.data.summary}>
+          <span slot="media" class="icon-tile"><FlaskConical size={26} aria-hidden="true" /></span>
+          <Fragment slot="meta">
+            <StatusLine lang={lang} status={entry.data.status} startDate={entry.data.startDate} endDate={entry.data.endDate} />
+            {entry.data.placeholder && <PlaceholderBadge lang={lang} />}
+          </Fragment>
+        </Card>
       ))}
     </div>
   )}
 </PageShell>
 
 <style>
-  .research-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); scroll-margin-top: calc(var(--capsule-h) + var(--space-6)); }
-  .research-card__link { color: inherit; text-decoration: none; }
-  .research-card__link:hover { text-decoration: underline; }
-  .research-card :global(.research-card__arrow) { position: absolute; top: var(--space-5); right: var(--space-5); color: var(--text-muted); }
   .empty { max-width: 36rem; }
 </style>

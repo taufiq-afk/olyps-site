@@ -21,6 +21,8 @@
   --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
   --text-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
   --text-small: 0.875rem;
+  /* Judul bagian di halaman detail: satu tingkat di bawah judul halaman. */
+  --text-section: clamp(1.375rem, 1.2rem + 0.8vw, 1.875rem);
 
   /* Bentuk */
   --radius-pill: 999px;

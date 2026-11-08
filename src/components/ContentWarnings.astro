@@ -1,21 +1,37 @@
 ---
 // Banner kecil hanya di mode dev: relasi yang menunjuk entri yang tidak ada (dilewati, bukan crash).
 // Pada build produksi komponen ini tidak merender apa pun, karena relasi putus sudah menggagalkan build.
-import { getBrokenRelations, type BrokenRelation } from '../i18n/content';
+import { getBrokenRelations, getMissingLang, type BrokenRelation, type MissingLang } from '../i18n/content';
+import type { Lang } from '../site.config';
 
-interface Props { scope: string }
-const { scope } = Astro.props;
+interface Props { scope: string; lang: Lang }
+const { scope, lang } = Astro.props;
 const items: BrokenRelation[] = import.meta.env.DEV && ['research', 'projects', 'publications', 'people', 'home'].includes(scope)
   ? await getBrokenRelations(scope as BrokenRelation['scope'])
   : [];
+const kinds = ['research', 'projects', 'publications', 'people'];
+const missing: MissingLang[] = import.meta.env.DEV ? await getMissingLang((kinds.includes(scope) ? scope : 'all') as MissingLang['scope'], lang) : [];
 ---
-{items.length > 0 && (
+{(items.length > 0 || missing.length > 0) && (
   <aside class="dev-warn" role="status" aria-live="polite">
-    <strong>Dev: {items.length} relasi putus dilewati</strong>
-    <ul>
-      {items.map((b) => <li><code>{b.file}</code> {b.field}: <code>{b.key}</code></li>)}
-    </ul>
-    <p>Di build produksi ini menjadi kesalahan. Hapus kuncinya dari berkas itu.</p>
+    {items.length > 0 && (
+      <Fragment>
+        <strong>Dev: {items.length} relasi putus dilewati</strong>
+        <ul>
+          {items.map((b) => <li><code>{b.file}</code> {b.field}: <code>{b.key}</code></li>)}
+        </ul>
+        <p>Di build produksi ini menjadi kesalahan. Hapus kuncinya dari berkas itu.</p>
+      </Fragment>
+    )}
+    {missing.length > 0 && (
+      <Fragment>
+        <strong>Dev: teks {lang.toUpperCase()} belum ada, tampil dalam bahasa lain</strong>
+        <ul>
+          {missing.map((m) => <li>kurang: <code>{m.file}</code></li>)}
+        </ul>
+        <p>Di build produksi ini menjadi kesalahan. Buat berkas itu.</p>
+      </Fragment>
+    )}
   </aside>
 )}
 

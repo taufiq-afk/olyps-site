@@ -41,7 +41,20 @@ export interface BrokenRelation {
   message: string;
 }
 
-interface Validation { errors: string[]; broken: BrokenRelation[] }
+/** Teks atau entri yang belum ada di salah satu bahasa. Di dev ditampilkan dalam bahasa lain dengan banner. */
+export interface MissingLang {
+  scope: Kind | 'all';
+  /** Path berkas yang kurang. */
+  file: string;
+  lang: Lang;
+  /** Path berkas pasangan di bahasa lain, dipakai sebagai pengganti di dev. */
+  fallback: string;
+  message: string;
+}
+
+interface Validation { errors: string[]; broken: BrokenRelation[]; missing: MissingLang[] }
+
+const TEXT_COLLECTIONS = ['site', 'home', 'pages', 'footer', 'contact'] as const;
 
 let validation: Promise<Validation> | undefined;
 const warned = new Set<string>();
@@ -52,6 +65,7 @@ async function computeValidation(): Promise<Validation> {
   const all = (await loadAll()) as unknown as Record<Kind, Any[]>;
   const errors: string[] = [];
   const broken: BrokenRelation[] = [];
+  const missing: MissingLang[] = [];
   const keysOf = (kind: Kind) => new Set(all[kind].map((e) => e.data.translationKey as string));
   const fileOf = (kind: Kind, entry: Any) => `src/content/${kind}/${entry.id}.md`;
   const addBroken = (scope: BrokenRelation['scope'], file: string, field: string, key: string, where: string, fix: string) =>
@@ -76,12 +90,28 @@ async function computeValidation(): Promise<Validation> {
         }
       }
     }
-    // Setiap translationKey harus ada di semua bahasa.
+    // Setiap translationKey harus ada di semua bahasa. Path berkas yang kurang mengikuti nama berkas pasangannya.
     for (const key of keysOf(kind)) {
       for (const lang of siteLangs) {
         if (!all[kind].some((e) => e.data.translationKey === key && e.data.lang === lang)) {
-          errors.push(`src/content/${kind}/${lang}/: translationKey "${key}" tidak punya versi ${lang}. Perbaikan: buat berkas ${lang}/<nama>.md dengan translationKey yang sama, atau hapus versi bahasa lainnya.`);
+          const other = all[kind].find((e) => e.data.translationKey === key)!;
+          const name = entrySlug(other.id);
+          missing.push({ scope: kind, lang, file: `src/content/${kind}/${lang}/${name}.md`, fallback: fileOf(kind, other),
+            message: `src/content/${kind}/${lang}/${name}.md tidak ada (translationKey "${key}" hanya punya versi ${other.data.lang}). Perbaikan: buat berkas itu sebagai terjemahan dari ${fileOf(kind, other)}.` });
         }
+      }
+    }
+  }
+  // Teks situs (site, home, pages, footer, contact) wajib ada di semua bahasa.
+  for (const coll of TEXT_COLLECTIONS) {
+    const entries = (await getCollection(coll)) as unknown as Any[];
+    for (const key of new Set(entries.map((e) => e.data.translationKey as string))) {
+      for (const lang of siteLangs) {
+        if (entries.some((e) => e.data.translationKey === key && e.data.lang === lang)) continue;
+        const other = entries.find((e) => e.data.translationKey === key)!;
+        const name = entrySlug(other.id);
+        missing.push({ scope: 'all', lang, file: `src/content/${coll}/${lang}/${name}.md`, fallback: `src/content/${coll}/${other.data.lang}/${name}.md`,
+          message: `src/content/${coll}/${lang}/${name}.md tidak ada (hanya ada versi ${other.data.lang}). Perbaikan: buat berkas itu sebagai terjemahan dari src/content/${coll}/${other.data.lang}/${name}.md.` });
       }
     }
   }
@@ -114,27 +144,38 @@ async function computeValidation(): Promise<Validation> {
         `hapus "${key}" dari daftar di berkas itu (di admin: Home, Featured projects), atau buat proyek dengan translationKey "${key}".`);
     }
   }
-  return { errors, broken };
+  return { errors, broken, missing };
 }
 
 /**
- * Validasi konten. Kesalahan struktur (versi bahasa hilang, daftar unggulan terlalu panjang atau ganda) selalu menggagalkan build.
+ * Validasi konten. Daftar unggulan terlalu panjang atau ganda selalu menggagalkan build.
+ * Versi bahasa yang hilang: di dev ditampilkan dalam bahasa lain dengan banner (getMissingLang), di build produksi menjadi kesalahan.
  * Relasi yang putus: di dev dilewati dengan peringatan di konsol dan banner halaman (getBrokenRelations), di build produksi
  * (dan npm run check:predeploy) tetap menjadi kesalahan dengan petunjuk perbaikan.
  */
 export async function assertContentValid(): Promise<void> {
   // Di dev hitung ulang setiap kali agar perbaikan di admin langsung terbaca.
   if (import.meta.env.DEV || !validation) validation = computeValidation();
-  const { errors, broken } = await validation;
+  const { errors, broken, missing } = await validation;
   const all = [...errors];
   if (import.meta.env.DEV) {
     for (const b of broken) {
       if (!warned.has(b.message)) { warned.add(b.message); console.warn(`[konten] relasi putus dilewati: ${b.message}`); }
     }
+    for (const m of missing) {
+      if (!warned.has(m.message)) { warned.add(m.message); console.warn(`[konten] versi bahasa hilang, memakai ${m.fallback}: ${m.message}`); }
+    }
   } else {
-    all.push(...broken.map((b) => b.message));
+    all.push(...broken.map((b) => b.message), ...missing.map((m) => m.message));
   }
   if (all.length) throw new Error(`Konten tidak valid (${all.length} masalah):\n- ${all.join('\n- ')}`);
+}
+
+/** Teks atau entri yang belum ada di bahasa halaman, untuk banner dev. Kosong di build produksi. */
+export async function getMissingLang(scope: Kind | 'all', lang: Lang): Promise<MissingLang[]> {
+  if (!import.meta.env.DEV) return [];
+  await assertContentValid();
+  return (await validation!).missing.filter((m) => (m.scope === scope || m.scope === 'all') && m.lang === lang);
 }
 
 /** Relasi putus untuk banner dev pada halaman terkait. Kosong di build produksi (di sana semuanya sudah menjadi kesalahan). */
@@ -142,6 +183,18 @@ export async function getBrokenRelations(scope: BrokenRelation['scope']): Promis
   if (!import.meta.env.DEV) return [];
   await assertContentValid();
   return (await validation!).broken.filter((b) => b.scope === scope);
+}
+
+/**
+ * Entri satu bahasa. Di dev, entri yang belum punya versi bahasa ini diganti dengan versi bahasa lain (banner menyebut berkasnya).
+ * Di build produksi tidak ada pengganti: validasi sudah menggagalkan build.
+ */
+function entriesIn(entries: Any[], lang: Lang): Any[] {
+  const own = entries.filter((e) => e.data.lang === lang);
+  if (!import.meta.env.DEV) return own;
+  const have = new Set(own.map((e) => e.data.translationKey));
+  const extra = entries.filter((e) => e.data.lang !== lang && !have.has(e.data.translationKey));
+  return [...own, ...extra.filter((e, i) => extra.findIndex((x) => x.data.translationKey === e.data.translationKey) === i)];
 }
 
 /**
@@ -176,8 +229,8 @@ const isPublished = (data: { draft: boolean; placeholder: boolean }) => !data.dr
  */
 export async function getLocalized<K extends Kind>(kind: K, lang: Lang) {
   await assertContentValid();
-  const entries = await getCollection(kind, (entry) => entry.data.lang === lang && isPublished(entry.data));
-  return entries.sort(compareEntries);
+  const entries = entriesIn((await getCollection(kind)) as unknown as Any[], lang).filter((e) => isPublished(e.data as { draft: boolean; placeholder: boolean }));
+  return (entries as unknown as Awaited<ReturnType<typeof getCollection<K>>>).sort(compareEntries);
 }
 
 /** Proyek unggulan sesuai urutan di src/data/featured.json. */
@@ -217,7 +270,7 @@ export async function getRelated(kind: Kind, key: string, lang: Lang): Promise<R
   }
   const items: RelatedItem[] = [];
   for (const k of KINDS) {
-    const localized = all[k].filter((e) => e.data.lang === lang && isPublished(e.data as { draft: boolean; placeholder: boolean })).sort(compareEntries);
+    const localized = entriesIn(all[k], lang).filter((e) => isPublished(e.data as { draft: boolean; placeholder: boolean })).sort(compareEntries);
     for (const entry of localized) {
       if (!linked.has(`${k}:${entry.data.translationKey}`)) continue;
       items.push({ kind: k, key: entry.data.translationKey, title: entry.data.title ?? entry.data.name, href: hrefFor(k, entrySlug(entry.id), lang) });
@@ -235,7 +288,7 @@ export async function getLeadsTo(keys: string[], lang: Lang): Promise<LeadsToIte
   const items: LeadsToItem[] = [];
   for (const key of keys) {
     for (const kind of ['projects', 'research', 'publications'] as Kind[]) {
-      const entry = all[kind].find((e) => e.data.translationKey === key && e.data.lang === lang && isPublished(e.data as { draft: boolean; placeholder: boolean }));
+      const entry = entriesIn(all[kind], lang).find((e) => e.data.translationKey === key && isPublished(e.data as { draft: boolean; placeholder: boolean }));
       if (entry) items.push({ kind, title: entry.data.title, href: hrefFor(kind, entrySlug(entry.id), lang) });
     }
   }
@@ -244,9 +297,7 @@ export async function getLeadsTo(keys: string[], lang: Lang): Promise<LeadsToIte
 
 /** Data kontak satu bahasa, sumber tunggal halaman Kontak dan footer. */
 export async function getContact(lang: Lang) {
-  const entry = (await getCollection('contact')).find((e) => e.data.lang === lang);
-  if (!entry) throw new Error(`Konten tidak valid:\n- contact: versi ${lang} tidak ada`);
-  return entry.data;
+  return getText('contact', lang, 'contact');
 }
 
 const MONTH_LOCALE: Record<Lang, string> = { en: 'en-US', id: 'id-ID' };
@@ -257,11 +308,15 @@ export function formatMonth(value: string, lang: Lang): string {
   return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(MONTH_LOCALE[lang], { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
-type TextCollection = 'site' | 'home' | 'pages' | 'footer';
+type TextCollection = 'site' | 'home' | 'pages' | 'footer' | 'contact';
 
 /** Satu entri teks situs (src/content/<koleksi>/<lang>/<berkas>.md). Entri yang hilang menggagalkan build, tanpa fallback. */
 async function getText<C extends TextCollection>(collection: C, lang: Lang, key: string) {
-  const entry = (await getCollection(collection)).find((e) => e.data.lang === lang && e.data.translationKey === key);
+  await assertContentValid();
+  const entries = await getCollection(collection);
+  // Di dev, teks yang belum ada diganti dengan bahasa lain (banner menyebut berkasnya). Di produksi validasi sudah gagal lebih dulu.
+  const entry = entries.find((e) => e.data.lang === lang && e.data.translationKey === key)
+    ?? (import.meta.env.DEV ? entries.find((e) => e.data.translationKey === key) : undefined);
   if (!entry) throw new Error(`Konten tidak valid:\n- src/content/${collection}/${lang}/${key}.md tidak ada (teks situs wajib ada di kedua bahasa)`);
   return entry.data;
 }
