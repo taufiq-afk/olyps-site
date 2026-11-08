@@ -16,7 +16,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const entries = await getLocalized('research', lang);
 const page = await getPage('research', lang);
 ---
-<PageShell lang={lang} current="research" title={page.title} lead={page.lead}>
+<PageShell lang={lang} current="research" title={page.title} tabTitle={page.tabTitle} lead={page.lead}>
   {entries.length === 0 ? (
     <div class="card empty">{page.emptyTitle && <h2>{page.emptyTitle}</h2>}{page.emptyBody && <p>{page.emptyBody}</p>}</div>
   ) : (

@@ -18,7 +18,8 @@ Situs OLYPS, sebuah ruang independen untuk belajar dan mengeksplorasi AI terapan
 - Research dan Project punya halaman detail (`/research/<slug>/` dan `/projects/<slug>/`). Orang yang terkait dengan entri riset tampil sebagai penulis di detailnya. Bagian kosong pada entri (mis. Roadmap atau Impact) tidak ditulis sama sekali, bukan diisi placeholder.
 - Research = pertanyaan atau hipotesis, metode, temuan yang bisa dikutip. Project = tujuan, cakupan, roadmap, dampak. Satu kalimat definisi tampil di halaman indeks masing-masing.
 - Token ukuran kartu: sm (anggota tim), md (daftar riset dan proyek, widget), lg (unggulan). Kartu sejenis berukuran sama.
-- Setiap halaman konten punya slot banner pixel (poster diam). Hanya satu video autoplay per halaman. Detail proyek punya slot media di kolom kanan (poster dulu, klip diputar saat diklik, muted, takarir VTT per bahasa).
+- Judul tab: beranda "OLYPS" (nama situs), halaman lain "<Nama halaman> | OLYPS". Slogan hanya di meta description. Kolom opsional `tabTitle` di `home` dan `pages` menimpanya, og:title dan twitter:title mengikuti. Predeploy memeriksa tidak ada `<title>` kosong.
+- Setiap halaman konten punya slot banner pixel per halaman dan tema (`public/banners/banner-<halaman>-<tema>.webp`, 2808x438 lossless, fallback ke poster hero). Hanya satu video autoplay per halaman. Detail proyek punya slot media di kolom kanan (poster dulu, klip diputar saat diklik, muted, takarir VTT per bahasa).
 - People: satu grid kompak auto-fill (5 sampai 6 kolom), kartu sama untuk semua, halaman profil per orang.
 
 ## Keputusan desain

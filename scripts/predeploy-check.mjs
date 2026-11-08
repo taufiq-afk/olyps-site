@@ -76,6 +76,13 @@ if (args.has('--allow-index')) warn('dilewati (--allow-index)');
 else report('semua halaman memiliki meta robots noindex', htmlFiles.filter((f) => !/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(readFileSync(f, 'utf8'))).map(rel));
 if (!siteConfig.noindex && !args.has('--allow-index')) fail('siteConfig.noindex bernilai false');
 
+// ---------- 1b. judul tab
+section('judul tab (<title>) tidak kosong');
+report('semua halaman memiliki <title> yang berisi teks', htmlFiles.filter((f) => {
+  const m = readFileSync(f, 'utf8').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  return !m || !m[1].trim();
+}).map(rel));
+
 // ---------- 2. placeholder
 section('teks placeholder di halaman produksi');
 {

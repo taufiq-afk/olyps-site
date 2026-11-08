@@ -11,13 +11,14 @@ interface Props {
   /** Kunci tautan navbar yang aktif. */
   current: string;
   title: string;
+  tabTitle?: string;
   lead?: string;
   /** Dua kolom: judul di kiri, isi di kanan. */
   split?: boolean;
 }
-const { lang, current, title, lead, split = false } = Astro.props;
+const { lang, current, title, tabTitle, lead, split = false } = Astro.props;
 ---
-<BaseLayout lang={lang} title={title}>
+<BaseLayout lang={lang} title={title} tabTitle={tabTitle}>
   <Navbar lang={lang} current={current} />
   <ContentWarnings scope={current} lang={lang} />
   <main id="content" class="container page-top page">

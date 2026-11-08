@@ -58,7 +58,13 @@ collections:
             label: Tagline
             widget: string
             i18n: true
-            hint: Main heading of the hero. Also the site title on Home.
+            hint: Main heading of the hero.
+          - name: tabTitle
+            label: Tab title
+            widget: string
+            i18n: true
+            required: false
+            hint: Optional. Browser tab title of Home. Leave empty to use the site name only. The tagline is not used in the tab title.
           - name: lead
             label: Lead
             widget: text
@@ -189,6 +195,12 @@ collections:
             widget: string
             i18n: true
             hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: tabTitle
+            label: Tab title
+            widget: string
+            i18n: true
+            required: false
+            hint: Optional. Browser tab title. Leave empty to use "Page title | OLYPS". Never empty in the browser, it falls back to the site name.
           - name: lead
             label: Introduction
             widget: text
@@ -229,6 +241,12 @@ collections:
             widget: string
             i18n: true
             hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: tabTitle
+            label: Tab title
+            widget: string
+            i18n: true
+            required: false
+            hint: Optional. Browser tab title. Leave empty to use "Page title | OLYPS". Never empty in the browser, it falls back to the site name.
           - name: lead
             label: Introduction
             widget: text
@@ -269,6 +287,12 @@ collections:
             widget: string
             i18n: true
             hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: tabTitle
+            label: Tab title
+            widget: string
+            i18n: true
+            required: false
+            hint: Optional. Browser tab title. Leave empty to use "Page title | OLYPS". Never empty in the browser, it falls back to the site name.
           - name: lead
             label: Introduction
             widget: text
@@ -309,6 +333,12 @@ collections:
             widget: string
             i18n: true
             hint: Heading of the page. The menu label is set separately under Footer and site info.
+          - name: tabTitle
+            label: Tab title
+            widget: string
+            i18n: true
+            required: false
+            hint: Optional. Browser tab title. Leave empty to use "Page title | OLYPS". Never empty in the browser, it falls back to the site name.
           - name: lead
             label: Introduction
             widget: text

@@ -4,21 +4,25 @@ import '../styles/global.css';
 import { siteConfig, siteLangs, type Lang } from '../site.config';
 import { buildThemeCss } from '../styles/themeCss';
 import { isLang, switchLangPath, useTranslations } from '../i18n/utils';
-import { getHome, getSite } from '../i18n/content';
+import { getSite } from '../i18n/content';
 
 interface Props {
   lang: Lang;
   title?: string;
+  /** Judul tab dari admin. Kosong: beranda memakai nama situs, halaman lain "<judul> | <nama situs>". */
+  tabTitle?: string;
   description?: string;
   noindex?: boolean;
 }
 
-const { lang, title, description, noindex = false } = Astro.props;
+const { lang, title, tabTitle, description, noindex = false } = Astro.props;
 const t = useTranslations(lang);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const site = await getSite(lang);
-const home = await getHome(lang);
-const pageTitle = title ? `${title} | ${site.name}` : `${site.name}: ${home.tagline}`;
+// Judul tab: kolom "Judul tab" bila diisi, jika tidak beranda = nama situs dan halaman lain = "<judul> | <nama situs>". Tidak pernah kosong.
+// Slogan hanya ada di meta description. og:title dan twitter:title memakai judul yang sama.
+const siteName = site.name?.trim() || 'OLYPS';
+const pageTitle = tabTitle?.trim() || (title?.trim() ? `${title.trim()} | ${siteName}` : siteName);
 const pageDescription = description ?? site.description;
 const themeCss = buildThemeCss();
 

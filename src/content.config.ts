@@ -151,6 +151,7 @@ const site = textFile('site', {
 const home = textFile('home', {
   eyebrow: text('eyebrow'),
   tagline: text('tagline'),
+  tabTitle: opt(z.string().trim().min(1)),
   lead: text('lead'),
   ctaLabel: text('ctaLabel'),
   featuredLabel: text('featuredLabel'),
@@ -172,6 +173,7 @@ const home = textFile('home', {
 // Halaman indeks Projects, Research, Publications, dan People (translationKey: projects, research, publications, people).
 const pages = textFile('pages', {
   title: text('title'),
+  tabTitle: opt(z.string().trim().min(1)),
   lead: opt(z.string().trim().min(1)),
   emptyTitle: opt(z.string().trim().min(1)),
   emptyBody: opt(z.string().trim().min(1)),

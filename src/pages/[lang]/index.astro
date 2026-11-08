@@ -7,7 +7,7 @@ import Explore from '../../components/home/Explore.astro';
 import WhatWeDo from '../../components/home/WhatWeDo.astro';
 import Footer from '../../components/Footer.astro';
 import ContentWarnings from '../../components/ContentWarnings.astro';
-import { getFeatured, getLocalized } from '../../i18n/content';
+import { getFeatured, getHome, getLocalized, getSite } from '../../i18n/content';
 import { siteLangs, type Lang } from '../../site.config';
 
 export function getStaticPaths() {
@@ -17,13 +17,15 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 // Daftar unggulan divalidasi di sini (lebih dari 3 atau key tidak ada menggagalkan build).
 const featured = await getFeatured(lang);
+const home = await getHome(lang);
+const site = await getSite(lang);
 const counts = {
   research: (await getLocalized('research', lang)).length,
   publications: (await getLocalized('publications', lang)).length,
   people: (await getLocalized('people', lang)).length,
 };
 ---
-<BaseLayout lang={lang}>
+<BaseLayout lang={lang} tabTitle={home.tabTitle} description={`${home.tagline} ${site.description}`}>
   <Navbar lang={lang} glass="media" />
   <ContentWarnings scope="home" lang={lang} />
   <main id="content">
