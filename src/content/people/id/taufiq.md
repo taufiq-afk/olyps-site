@@ -1,9 +1,16 @@
 ---
-lang: id
 translationKey: taufiq
+photo: /src/assets/people/taufiq.webp
 name: Muhammad Taufiq Al Fikri
-role: Computer Vision Engineer
-bio: "Muhammad Taufiq Al Fikri adalah computer vision engineer yang menekuni deep learning untuk pencitraan medis, dengan fokus pada patologi komputasional dan analisis MRI otak. Ia lulusan S1 Informatika dan sedang menempuh studi Magister Kecerdasan Artifisial."
+role: AI Engineer
+placeholder: false
+bio: Muhammad Taufiq Al Fikri adalah AI engineer yang mengerjakan deep learning yang dapat dipercaya untuk pencitraan medis, dengan fokus pada patologi komputasional dan analisis MRI otak. Ia juga mulai menjajaki pengenalan suara serta AI untuk masalah lingkungan. Ia lulusan S1 Informatika yang kini menempuh program Magister Artificial Intelligence.
+affiliations:
+  - Magister Kecerdasan Artifisial, Institut Teknologi Bandung
+  - Sarjana Informatika (S.Kom.), Telkom University
+links:
+  - label: LinkedIn
+    url: https://www.linkedin.com/in/taufiq-afk/
 skills:
   - Python
   - PyTorch
@@ -17,9 +24,10 @@ skills:
   - brain MRI
   - histopathology
   - foundation models
-affiliations:
-  - Magister Kecerdasan Artifisial, Institut Teknologi Bandung
-  - Sarjana Informatika (S.Kom.), Telkom University
+relatedResearch: []
+relatedProjects: []
+relatedPublications: []
 order: 1
-placeholder: false
+draft: false
+lang: id
 ---

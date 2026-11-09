@@ -1,22 +1,22 @@
 ---
-lang: en
 translationKey: home
-eyebrow: "An independent space for applied AI"
-tagline: "Applied AI for health and the environment."
-lead: "A space where we explore applied AI for medical imaging and for waste challenges in Indonesia, and document what we learn."
-ctaLabel: "Explore"
-featuredLabel: "Featured project"
-exploreTitle: "Where to look next"
-exploreEmpty: "Nothing here yet."
-exploreResearchTitle: "Research"
-exploreResearchOne: "1 research entry"
-exploreResearchOther: "{n} research entries"
-explorePublicationsTitle: "Publications"
-explorePublicationsOne: "1 publication"
-explorePublicationsOther: "{n} publications"
-explorePeopleTitle: "People"
-explorePeopleOne: "1 person"
-explorePeopleOther: "{n} people"
-whatTitle: "What we work on"
-whatEmpty: "Featured projects will appear here once they are documented."
+eyebrow: AN INDEPENDENT RESEARCH SPACE FOR APPLIED AI
+tagline: Applied AI, explored and documented in the open.
+lead: We work on real problems wherever AI can help, starting with medical imaging, speech, and the environment.
+ctaLabel: Explore our work
+featuredLabel: Featured project
+exploreTitle: Where to look next
+exploreResearchTitle: Research
+exploreResearchOne: 1 research entry
+exploreResearchOther: '{n} research entries'
+explorePublicationsTitle: Publications
+explorePublicationsOne: 1 publication
+explorePublicationsOther: '{n} publications'
+explorePeopleTitle: People
+explorePeopleOne: 1 person
+explorePeopleOther: '{n} people'
+exploreEmpty: Nothing here yet.
+whatTitle: What we work on
+whatEmpty: Featured projects will appear here once they are documented.
+lang: en
 ---
